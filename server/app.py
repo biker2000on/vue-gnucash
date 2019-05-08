@@ -7,7 +7,8 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app)
 
-db = '/mnt/c/Users/Justin/Documents/Finance/mymoney.sqlite.gnucash'
+# db = '/mnt/c/Users/Justin/Documents/Finance/mymoney.sqlite.gnucash'
+db = r'C:\Users\Justin\Documents\Finance\mymoney.sqlite.gnucash'
 book = piecash.open_book('sqlite:///' + db + '?check_same_thread=False', readonly=True, do_backup=False, open_if_lock=True)
 
 # need to add query parameters to all plural resources

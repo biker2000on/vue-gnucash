@@ -60,6 +60,7 @@
     </v-toolbar>
 
     <v-content>
+      <Table />
       <HelloWorld/>
     </v-content>
   </v-app>
@@ -67,7 +68,7 @@
 
 <script>
 import HelloWorld from './components/HelloWorld'
-import datatable-cell
+import Table from './components/Table.vue'
 
 const object_in_hierarchy = (guid, accounts) => {
   for (let acct of accounts) {
@@ -114,7 +115,7 @@ function getObject(theObject, value) {
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    HelloWorld, Table
   },
   data () {
     return {

@@ -1,7 +1,7 @@
 <template>
     <div class="datatable-collection">
         <table v-if="groupable" :class="{ 'table-striped': striped }">
-            <tr v-for="(data, group, index) in groups" :key="index">
+            <tr v-for="(data, group, index) in groups" :key="'group' + index">
                 <td class="datatable-group" :colspan="columnSpan">
                     <div class="datatable-group-header" layout="row center-justify">
                         <div self="size-x1">
@@ -30,7 +30,7 @@
             <tr v-if="rows.length < 1">
                 <td class="datatable-info-cell" :colspan="columnSpan">{{ message }}</td>
             </tr>
-            <tr v-for="(row, index) in rows" :key="index">
+            <tr v-for="(row, index) in rows" :key="index + 'row'">
                 <td v-if="lineNumbers" class="datatable-cell datatable-linenumber-cell" :style="{ width: margin }">{{ collectionIndex + index + 1 }}</td>
                 <td v-if="aggregated" class="datatable-cell datatable-aggregate-cell">&nbsp;</td>
                 <datatable-cell v-for="column in columns" :key="column.id" :column="column" :row="row" :editable="editable" :optimize="optimize"></datatable-cell>
