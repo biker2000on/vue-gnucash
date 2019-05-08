@@ -6,6 +6,8 @@ If you would like a feature added to the datatable or if you find a bug, please 
 
 **Note:** The line numbering is a little bit quirky in multi-group mode. I'll hopefully have it fixed soon. 
 
+**Note:** Requires adding the runtimeCompiler: true to the package.json file so that the datatable-cell.js templates can be compiled.
+
 To see a demo of this component in action check out this codepen example: [http://codepen.io/andrewcourtice/full/woQzpa](http://codepen.io/andrewcourtice/full/woQzpa).
 
 ![General](https://cloud.githubusercontent.com/assets/11718453/24491089/f2641d34-1568-11e7-8b84-dd4fd53ed0ff.png)

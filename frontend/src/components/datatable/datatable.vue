@@ -66,6 +66,7 @@
     import filterBy from "../../utilities/filter-by.js";
     import sortBy from "../../utilities/sort-by.js";
     import { isCollection } from "../../utilities/base/type-validator.js";
+    import Chip from "./chip.vue"
 
     export default {
 
@@ -275,7 +276,8 @@
         },
 
         components: {
-            datatableCollection: DatatableCollection
+            datatableCollection: DatatableCollection,
+            Chip,
         }
 
     }

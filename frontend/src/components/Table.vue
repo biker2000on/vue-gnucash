@@ -1,19 +1,19 @@
 <template>
-  <datatable id="data-table-options" :source="customers.columns" :filterable="false" editable>
+  <datatable id="data-table-options" :source="customers.rows" :filterable="false" editable>
     <datatable-column id="purchasor_name" label="Name" width="25"></datatable-column>
     <datatable-column id="purchasor_email" label="Email"></datatable-column>
     <datatable-column id="purchase_date" label="Date" data-intro="Clicking a column will sort by that column" data-step="4"></datatable-column>
     <datatable-column id="purchase_amount" label="Cost" data-intro="Drag a column into the middle of the table to group by that column. You can repeat this process to perform nested grouping" data-step="5"></datatable-column>
-    <!-- <template slot="sortable" scope="cell">
+    <template slot="sortable" slot-scope="cell">
         <div class="datatable-options-toggle">
             <toggle :id="cell.row.id + '-sortable'" v-model="cell.row.sortable"></toggle>
         </div>
     </template>
-    <template slot="groupable" scope="cell">
+    <template slot="groupable" slot-scope="cell">
         <div class="datatable-options-toggle">
             <toggle :id="cell.row.id + '-groupable'" v-model="cell.row.groupable"></toggle>
         </div>   
-    </template> -->
+    </template>
   </datatable>
 </template>
 
