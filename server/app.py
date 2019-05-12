@@ -53,12 +53,12 @@ class Account_Register(Resource):
     def get(self, account_guid):
         account = book.accounts(guid=account_guid)
         transaction_splits = {}
-        splits = account.splits
         start = request.args.get('start', 1, int)
         limit = request.args.get('limit', 20, int)
-        transaction_splits['count'] = len(splits)
+        transaction_splits['count'] = 10000 #placeholder amount to quicken up query time, might take it out
         transaction_splits['start'] = start
         transaction_splits['limit'] = limit
+        # splits = account.splits
         if transaction_splits['start'] == 1:
             transaction_splits['previous'] = ''
         else: 
@@ -68,7 +68,7 @@ class Account_Register(Resource):
         else:
             transaction_splits['next'] = ''
 
-        transaction_splits['results'] = [get_transaction(c.transaction_guid) for c in splits[(transaction_splits['start'] - 1):(transaction_splits['start'] - 1 + transaction_splits['limit'])]]
+        transaction_splits['results'] = [get_transaction(c.transaction_guid) for c in account.splits[(-start - limit):(-start)]]
         return transaction_splits
 
 

@@ -60,14 +60,13 @@
     </v-toolbar>
 
     <v-content>
-      <Table />
-      <HelloWorld/>
+      <Table :account_guid="active_account_guid" :splits="splits[active_account_guid] ? splits[active_account_guid].results : undefined"/>
+      <!-- <HelloWorld/> -->
     </v-content>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld'
 import Table from './components/Table.vue'
 
 const object_in_hierarchy = (guid, accounts) => {
@@ -115,7 +114,7 @@ function getObject(theObject, value) {
 export default {
   name: 'App',
   components: {
-    HelloWorld, Table
+    Table
   },
   data () {
     return {
@@ -147,7 +146,7 @@ export default {
       axios.get('http://localhost:5000/account/' + account_guid + '/transactions')
         .then((response) => {
           if (account_guid in this.splits) {
-            this.splits[account_guid].results.append(response.data.results)
+            this.splits[account_guid].results.concat(response.data.results)
             this.splits[account_guid].previous = response.data.previous
             this.splits[account_guid].next = response.data.next
           } else {
