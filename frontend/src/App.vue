@@ -60,7 +60,7 @@
     </v-toolbar>
 
     <v-content>
-      <Table :account_guid="active_account_guid" :splits="splits[active_account_guid] ? splits[active_account_guid].results : undefined"/>
+      <Table :account_guid="active_account_guid" :flataccounts="flatAccounts" :splits="splits[active_account_guid] ? splits[active_account_guid].results : undefined"/>
       <!-- <HelloWorld/> -->
     </v-content>
   </v-app>
@@ -127,6 +127,8 @@ export default {
       splits: {},
       next: null,
       previous: null,
+      separator: ':',
+      flatAccounts: [],
     }
   },
   methods: {
@@ -158,14 +160,37 @@ export default {
     moreSplits(url_partial) {
       axios.get('http://localhost:5000' + url_partial)
         .then((response) => this.splits.append(response.data.results))
-    }
+    },
+    accountName(account, parentName='', separator=':') {
+      const name = parentName + separator + account.name
+      let names = [name]
+      if (Boolean(...account.children)) {
+        for (acc of account.children) {
+          return names.push(...accountName(acc, name, separator))
+        }
+      }
+      return names
+    },
+    getFlatAccounts() {
+      axios.get('http://localhost:5000/accounts_flat')
+        .then(response => {
+          this.flatAccounts = response.data
+        })
+    },
   },
   computed: {
     active_account() {
       return object_in_hierarchy(this.active_account_guid, this.accounts)
     },
+    fullnameAccounts() {
+      let all = []
+      for (a of accounts) {
+        all.push(...this.accountName(a,'',separator))
+      }
+    }
   },
   created() {
+    this.getFlatAccounts()
     this.get_accounts()
   }
 }

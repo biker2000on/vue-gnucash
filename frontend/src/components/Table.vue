@@ -65,6 +65,10 @@ export default {
       splits: {
           type: Array,
           required: false
+      },
+      flataccounts: {
+        type: Array,
+        required: true,
       }
   },
   data: () => ({
@@ -76,6 +80,7 @@ export default {
   computed: {
     tableData() {
       const vm = this
+      if (!vm.splits) return []
       // console.log('inside tableData computed property')
       // console.log(vm.splits)
       // console.log(vm.account_guid)
@@ -94,7 +99,7 @@ export default {
         return {
           post_date: c.post_date,
           description: c.description,
-          account: c.splits[0].account_guid, //need to map to treeview
+          account: vm.flataccounts[c.splits[0].account_guid],
           debit: c.debit,
           credit: c.credit,
           balance: '',

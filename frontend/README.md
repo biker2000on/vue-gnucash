@@ -1,5 +1,9 @@
 # frontend
 
+## Currently Working On
+* Return a flat list of fullname accounts (done by server)
+
+
 ## Project setup
 ```
 npm install

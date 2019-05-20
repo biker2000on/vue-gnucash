@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import './plugins/vuetify'
-// import './plugins/vuetiful'
 import App from './App.vue'
 import axios from 'axios'
 

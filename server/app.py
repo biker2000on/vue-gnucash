@@ -39,6 +39,10 @@ class Accounts(Resource):
         # 'guid': account.guid} for account in book.accounts]
         # return accounts
 
+class FlatAccounts(Resource):
+    def get(self):
+        # return [{guid: account.fullname, 'guid': account.guid} for account in book.accounts]
+        return {account.guid: account.fullname for account in book.accounts}
 class Account(Resource):
     def get(self, account_guid):
         account = book.accounts(guid=account_guid)
@@ -158,6 +162,7 @@ class Transaction(Resource):
 
 
 api.add_resource(Accounts, '/accounts')
+api.add_resource(FlatAccounts, '/accounts_flat')
 api.add_resource(Account, '/account/<account_guid>')
 api.add_resource(Account_Register, '/account/<account_guid>/transactions')
 api.add_resource(Transactions, '/transactions')
