@@ -1,10 +1,11 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('accounts', {
+  const Accounts =  sequelize.define('accounts', {
     guid: {
       type: DataTypes.TEXT,
       allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true
     },
     name: {
@@ -17,7 +18,11 @@ module.exports = function(sequelize, DataTypes) {
     },
     commodity_guid: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'commodities',
+        key: 'guid'
+      }
     },
     commodity_scu: {
       type: DataTypes.INTEGER,
@@ -29,7 +34,11 @@ module.exports = function(sequelize, DataTypes) {
     },
     parent_guid: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'accounts',
+        key: 'guid'
+      }
     },
     code: {
       type: DataTypes.TEXT,
@@ -48,6 +57,14 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     }
   }, {
-    tableName: 'accounts'
+    timestamps: false, tableName: 'accounts',
   });
+
+  // Accounts.associate = function(models) {
+  //   Accounts.hasMany(models.splits)
+  //   Accounts.belongsTo(Accounts, {as: 'parent', foreignKey: 'parent_guid'})
+  //   Accounts.hasMany(Accounts, {as: 'children', foreignKey: 'parent_guid'})
+  // }
+
+  return Accounts
 };

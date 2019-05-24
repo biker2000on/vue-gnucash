@@ -1,7 +1,7 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('books', {
+  const Books = sequelize.define('books', {
     guid: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -9,13 +9,19 @@ module.exports = function(sequelize, DataTypes) {
     },
     root_account_guid: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'accounts',
+        key: 'guid'
+      }
     },
     root_template_guid: {
       type: DataTypes.TEXT,
       allowNull: false
     }
   }, {
-    tableName: 'books'
+    timestamps: false, tableName: 'books'
   });
+
+  return Books
 };

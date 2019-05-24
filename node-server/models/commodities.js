@@ -5,6 +5,7 @@ module.exports = function(sequelize, DataTypes) {
     guid: {
       type: DataTypes.TEXT,
       allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true
     },
     namespace: {
@@ -40,6 +41,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     }
   }, {
-    tableName: 'commodities'
+    timestamps: false, tableName: 'commodities'
   });
 };

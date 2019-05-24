@@ -11,6 +11,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     }
   }, {
-    tableName: 'gnclock'
+    timestamps: false, tableName: 'gnclock'
   });
 };

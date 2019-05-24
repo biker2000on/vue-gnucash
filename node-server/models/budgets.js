@@ -20,6 +20,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     }
   }, {
-    tableName: 'budgets'
+    timestamps: false, tableName: 'budgets'
   });
 };

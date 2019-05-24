@@ -124,6 +124,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     }
   }, {
-    tableName: 'customers'
+    timestamps: false, tableName: 'customers'
   });
 };

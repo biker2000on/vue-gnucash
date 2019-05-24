@@ -40,6 +40,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     }
   }, {
-    tableName: 'orders'
+    timestamps: false, tableName: 'orders'
   });
 };

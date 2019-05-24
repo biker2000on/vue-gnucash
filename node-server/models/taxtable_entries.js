@@ -28,6 +28,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     }
   }, {
-    tableName: 'taxtable_entries'
+    timestamps: false, tableName: 'taxtable_entries'
   });
 };

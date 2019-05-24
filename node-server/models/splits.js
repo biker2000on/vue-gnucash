@@ -1,19 +1,28 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('splits', {
+  const Splits =  sequelize.define('splits', {
     guid: {
       type: DataTypes.TEXT,
       allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true
     },
     tx_guid: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'transactions',
+        key: 'guid'
+      }
     },
     account_guid: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'accounts',
+        key: 'guid'
+      }
     },
     memo: {
       type: DataTypes.TEXT,
@@ -28,7 +37,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     reconcile_date: {
-      type: DataTypes.TEXT,
+      type: DataTypes.DATEONLY,
       allowNull: true
     },
     value_num: {
@@ -49,9 +58,21 @@ module.exports = function(sequelize, DataTypes) {
     },
     lot_guid: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'lots',
+        key: 'guid'
+      }
     }
   }, {
-    tableName: 'splits'
+    timestamps: false, tableName: 'splits'
   });
+
+  Splits.associate = function(models) {
+    Splits.belongsTo(models.accounts, {foreignKey: 'account_guid'})
+    Splits.belongsTo(models.lots, {foreignKey: 'lot_guid'})
+    Splits.belongsTo(models.transactions, {foreignKey: 'tx_guid'})
+  }
+
+  return Splits
 };

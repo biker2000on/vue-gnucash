@@ -24,6 +24,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     }
   }, {
-    tableName: 'taxtables'
+    timestamps: false, tableName: 'taxtables'
   });
 };
