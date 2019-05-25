@@ -1,4 +1,5 @@
 const sequelize = require('sequelize')
+// const models = require('../models')
 
 const resolvers = {
   Query: {
@@ -8,15 +9,37 @@ const resolvers = {
     async accounts (root, args, {models}) {
       return models.accounts.findAll()
     },
+    async balances (root, args, {models}) {
+      return models.splits.findAll({
+        attributes: [[sequelize.fn('SUM',sequelize.literal('value_num / value_denom')), 'balance'], 
+                      'account_guid', 
+                      'value_denom',
+                    ],
+        group: 'account_guid',
+        raw: true,
+      })
+    }
   },
   Account: {
-    async balance (account) {
+    async balance (account, args, {models}) { // still needs work
       const accBalance =  await account.getSplits({
-        attributes: [[sequelize.fn('SUM', sequelize.col('value_num')), 'balance']],
+        attributes: [[sequelize.fn('SUM', sequelize.literal('value_num / value_denom')), 'balance']],
         raw: true,
       })
       console.log(accBalance)
       return accBalance[0].balance
+      // const accBalances =  await models.splits.findAll({
+      //   attributes: [[sequelize.fn('SUM', sequelize.col('value_num')), 'balance'], 'account_guid'],
+      //   group: 'account_guid',
+      //   raw: true,
+      // })
+      // // console.log(accBalances)
+      // return accBalances.reduce((a,c) => {
+      //   if (c.account_guid == account.guid) {
+      //     a = c.balance
+      //     return a
+      //   } return a
+      // },)
     },
     async commodity (account) {
       return account.getCommodity()
@@ -24,11 +47,16 @@ const resolvers = {
     async splits (account) {
       return account.getSplits()
     },
-    async children (account) {
-      return account.getAccounts()
+    async children (account, {guid}, {models}) {
+      const childr = await models.accounts.findAll({
+        where: {
+          parent_guid: account.guid
+        }
+      })
+      return childr
     },
-    async parent (account) {
-      return account.getAccount()
+    async parent (account, {guid}, {models}) {
+      return models.accounts.findByPk(account.parent_guid)
     },
   },
   Split: {

@@ -61,9 +61,16 @@ const typeDefs = gql`
     quote_tz: String!
   }
 
+  type Balance {
+    balance: Float
+    account_guid: String!
+    value_denom: Int!
+  }
+
   type Query {
     account(guid: String!): Account
     accounts: [Account!]!
+    balances: [Balance!]!
   }
 
 `
