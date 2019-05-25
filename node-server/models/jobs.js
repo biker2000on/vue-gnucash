@@ -32,6 +32,8 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     }
   }, {
-    timestamps: false, tableName: 'jobs'
+    timestamps: false,
+underscored: true,
+ tableName: 'jobs'
   });
 };

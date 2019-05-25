@@ -60,6 +60,8 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     }
   }, {
-    timestamps: false, tableName: 'schedxactions'
+    timestamps: false,
+underscored: true,
+ tableName: 'schedxactions'
   });
 };

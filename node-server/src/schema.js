@@ -5,6 +5,7 @@ const typeDefs = gql`
     guid: String!
     name: String!
     account_type: String!
+    balance: Float
     commodity_guid: String!
     commodity: Commodity!
     children: [Account]

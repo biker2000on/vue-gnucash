@@ -1,7 +1,7 @@
 /* jshint indent: 2 */
 
-module.exports = function(sequelize, DataTypes) {
-  const Splits =  sequelize.define('splits', {
+module.exports = function (sequelize, DataTypes) {
+  const Splits = sequelize.define('splits', {
     guid: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -11,10 +11,10 @@ module.exports = function(sequelize, DataTypes) {
     tx_guid: {
       type: DataTypes.TEXT,
       allowNull: false,
-      references: {
-        model: 'transactions',
-        key: 'guid'
-      }
+      // references: {
+      //   model: 'transactions',
+      //   key: 'guid'
+      // }
     },
     account_guid: {
       type: DataTypes.TEXT,
@@ -65,13 +65,22 @@ module.exports = function(sequelize, DataTypes) {
       }
     }
   }, {
-    timestamps: false, tableName: 'splits'
+    timestamps: false,
+    underscored: true,
+    tableName: 'splits'
   });
 
-  Splits.associate = function(models) {
-    Splits.belongsTo(models.accounts, {foreignKey: 'account_guid'})
-    Splits.belongsTo(models.lots, {foreignKey: 'lot_guid'})
-    Splits.belongsTo(models.transactions, {foreignKey: 'tx_guid'})
+  Splits.associate = function (models) {
+    Splits.belongsTo(models.accounts, {
+      foreignKey: 'account_guid'
+    })
+    Splits.belongsTo(models.lots, {
+      foreignKey: 'lot_guid'
+    })
+    Splits.belongsTo(models.transactions, {
+      // foreignKey: 'tx_guid',
+      as: 'tx'
+    })
   }
 
   return Splits

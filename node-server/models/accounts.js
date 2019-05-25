@@ -1,7 +1,7 @@
 /* jshint indent: 2 */
 
-module.exports = function(sequelize, DataTypes) {
-  const Accounts =  sequelize.define('accounts', {
+module.exports = function (sequelize, DataTypes) {
+  const Accounts = sequelize.define('accounts', {
     guid: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -57,14 +57,22 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     }
   }, {
-    timestamps: false, tableName: 'accounts',
+    timestamps: false,
+    underscored: true,
+    tableName: 'accounts',
   });
 
-  // Accounts.associate = function(models) {
-  //   Accounts.hasMany(models.splits)
-  //   Accounts.belongsTo(Accounts, {as: 'parent', foreignKey: 'parent_guid'})
-  //   Accounts.hasMany(Accounts, {as: 'children', foreignKey: 'parent_guid'})
-  // }
+  Accounts.associate = function (models) {
+    Accounts.hasMany(models.splits)
+    Accounts.belongsTo(Accounts, {
+      as: 'parent',
+      foreignKey: 'parent_guid'
+    })
+    Accounts.hasMany(Accounts, {
+      as: 'children',
+      foreignKey: 'parent_guid'
+    })
+  }
 
   return Accounts
 };

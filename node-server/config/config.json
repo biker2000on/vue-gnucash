@@ -1,12 +1,7 @@
 {
   "development": {
     "dialect": "sqlite",
-    "storage": "../mymoney.sqlite",
-    "define": {
-      "defaultScope": {
-        "timestamps": false
-      }
-    }
+    "storage": "./mymoney.sqlite"
   },
   "test": {
     "username": "root",

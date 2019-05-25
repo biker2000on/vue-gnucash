@@ -21,7 +21,9 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     }
   }, {
-    timestamps: false, tableName: 'lots'
+    timestamps: false,
+underscored: true,
+ tableName: 'lots'
   });
 
   Lots.associate = function(models) {

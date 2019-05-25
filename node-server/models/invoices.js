@@ -76,6 +76,8 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     }
   }, {
-    timestamps: false, tableName: 'invoices'
+    timestamps: false,
+underscored: true,
+ tableName: 'invoices'
   });
 };

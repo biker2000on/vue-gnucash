@@ -128,6 +128,8 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     }
   }, {
-    timestamps: false, tableName: 'entries'
+    timestamps: false,
+underscored: true,
+ tableName: 'entries'
   });
 };

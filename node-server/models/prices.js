@@ -36,6 +36,8 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     }
   }, {
-    timestamps: false, tableName: 'prices'
+    timestamps: false,
+underscored: true,
+ tableName: 'prices'
   });
 };

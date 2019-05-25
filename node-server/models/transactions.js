@@ -34,11 +34,13 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     }
   }, {
-    timestamps: false, tableName: 'transactions'
+    timestamps: false,
+underscored: true,
+ tableName: 'transactions'
   });
 
   Transactions.associate = function(models) {
-    Transactions.hasMany(models.splits)
+    // Transactions.hasMany(models.splits, {as: 'tx'})
     Transactions.hasOne(models.commodities)
   }
 
