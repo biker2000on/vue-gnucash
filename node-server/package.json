@@ -11,9 +11,11 @@
   "license": "ISC",
   "dependencies": {
     "apollo-server": "^2.5.0",
+    "datasource-sql": "^0.1.7",
     "express": "^4.16.4",
     "express-graphql": "^0.8.0",
     "graphql": "^14.2.1",
+    "knex": "^0.17.1",
     "sequelize": "^5.8.6",
     "sqlite3": "^4.0.8"
   }

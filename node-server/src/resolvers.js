@@ -3,13 +3,14 @@ const sequelize = require('sequelize')
 
 const resolvers = {
   Query: {
-    async account (root, {guid}, {models}) {
-      return models.accounts.findByPk(guid)
+    async account (root, {guid}, {knex}) {
+      console.log(guid)
+      return knex('accounts').select().where('guid','=', '346723ca372c085551eb2fe8fc3f01f1')
     },
-    async accounts (root, args, {models}) {
-      return models.accounts.findAll()
+    async accounts (root, args, {knex}) {
+      return knex.select().from('accounts')
     },
-    async balances (root, args, {models}) {
+    async balances (root, args, {knex}) {
       return models.splits.findAll({
         attributes: [[sequelize.fn('SUM',sequelize.literal('value_num / value_denom')), 'balance'], 
                       'account_guid', 
