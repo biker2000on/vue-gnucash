@@ -1,6 +1,3 @@
-const sequelize = require('sequelize')
-// const models = require('../models')
-
 const resolvers = {
   Query: {
     async account (root, {guid}, {knex}) {
@@ -42,19 +39,15 @@ const resolvers = {
                           .join('transactions as t','splits.tx_guid','t.guid')
                           .select('t.guid','t.currency_guid','t.num','t.post_date','t.enter_date','t.description')
                           .limit(undefined)
-      console.log(txs)
       return txs
     },
-    async children (account, {guid}, {models}) {
-      const childr = await models.accounts.findAll({
-        where: {
-          parent_guid: account.guid
-        }
-      })
-      return childr
+    async children (account, args, {models}) {
+      const children = await knex('accounts').where('parent_guid',account.guid).select()
+      return children
     },
-    async parent (account, {guid}, {models}) {
-      return models.accounts.findByPk(account.parent_guid)
+    async parent (account, args, {knex}) {
+      const parent = await knex('accounts').where('guid',account.parent_guid).select()
+      return parent[0]
     },
   },
   Split: {

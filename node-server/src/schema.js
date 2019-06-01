@@ -36,10 +36,10 @@ const typeDefs = gql`
     action: String!
     reconcile_state: String!
     reconcile_date: String!
-    value: Float!
     quantity: Float!
-    lot_guid: String!
+    value: Float!
     lot: Lot
+    lot_guid: String!
   }
 
   type Lot {
