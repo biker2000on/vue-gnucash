@@ -5,7 +5,7 @@ const typeDefs = gql`
     guid: String!
     name: String!
     account_type: String!
-    balance: Float
+    balance: Balance
     commodity_guid: String!
     commodity: Commodity!
     children: [Account]
@@ -14,6 +14,7 @@ const typeDefs = gql`
     hidden: Boolean
     placeholder: Boolean
     splits: [Split]
+    transactions: [Transaction]
   }
 
   type Transaction {
@@ -63,8 +64,9 @@ const typeDefs = gql`
 
   type Balance {
     balance: Float
+    quantity: Float
+    value: Float
     account_guid: String!
-    value_denom: Int!
   }
 
   type Query {
