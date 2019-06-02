@@ -5,7 +5,7 @@ const resolvers = {
       return acc[0]
     },
     async accounts (root, args, {knex}) {
-      return knex.select().from('accounts')
+      return knex('accounts').select()
     },
     async balances (root, args, {knex}) {
       const balances = await knex('splits').groupBy('account_guid')
@@ -37,7 +37,7 @@ const resolvers = {
     async transactions (account, args, {knex}) {
       const txs = await knex('splits').where('splits.account_guid', account.guid)
                           .join('transactions as t','splits.tx_guid','t.guid')
-                          .select('t.guid','t.currency_guid','t.num','t.post_date','t.enter_date','t.description')
+                          .select('t.*')
                           .limit(undefined)
       return txs
     },

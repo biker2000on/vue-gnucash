@@ -15,6 +15,7 @@ const typeDefs = gql`
     placeholder: Boolean
     splits: [Split]
     transactions: [Transaction]
+    depth: Int!
   }
 
   type Transaction {

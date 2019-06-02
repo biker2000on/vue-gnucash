@@ -1,6 +1,6 @@
 # SQL Commands to return various info
 
-SQL commands on a sqlite database for gnucash. Commands are to retrieve info for all parts of a web interface that would include reporting and entering of data.
+SQL commands on a sqlite databASe for gnucash. Commands are to retrieve info for all parts of a web interface that would include reporting and entering of data.
 
 ## Returns all expenses grouped by month
 
@@ -50,3 +50,22 @@ LEFT JOIN splits ON transactions.guid = splits.tx_guid
 WHERE splits.tx_guid IS NULL
 ```
 
+## Recursive CTE
+
+The Recursive Common Table Expression or CTE is able to return the nested structure of hierarchical self-referencing data.
+
+```SQL
+WITH RECURSIVE `ancestors` AS (
+	SELECT a.*, 0 AS depth
+	FROM accounts AS a
+	WHERE a.guid = "fd4dd79886327b270a0fa8efe6a07972" 
+	
+	union ALL
+	
+	SELECT a.*, c.depth + 1 AS depth
+	FROM accounts AS a
+	INNER JOIN ancestors AS c ON c.guid = a.parent_guid
+	)
+
+SELECT * from ancestors
+```
