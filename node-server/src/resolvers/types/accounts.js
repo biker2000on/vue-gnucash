@@ -1,22 +1,4 @@
-const resolvers = {
-  Query: {
-    async account (root, {guid}, {knex}) {
-      const acc = await knex('accounts').select().where({guid})
-      return acc[0]
-    },
-    async accounts (root, args, {knex}) {
-      return knex('accounts').select()
-    },
-    async balances (root, args, {knex}) {
-      const balances = await knex('splits').groupBy('account_guid')
-        .sum({value: knex.raw('?? / ??', ['value_num','value_denom'])})
-        .sum({quantity: knex.raw('?? / ??',['quantity_num','quantity_denom'])})
-        .sum({balance: knex.raw('?? / ??',['quantity_num','quantity_denom'])})
-        .select('account_guid')
-      console.log(balances)
-      return balances
-    }
-  },
+const accountResolver = {
   Account: {
     async balance (account, args, {knex}) {
       const accBalance =  await knex('splits').where('account_guid', account.guid)
@@ -41,23 +23,17 @@ const resolvers = {
                           .limit(undefined)
       return txs
     },
-    async children (account, args, {models}) {
-      const children = await knex('accounts').where('parent_guid',account.guid).select()
+    async children (account, args, {knex}) {
+      const children = await knex('accounts').where('parent_guid', account.guid).select()
       return children
     },
     async parent (account, args, {knex}) {
       const parent = await knex('accounts').where('guid',account.parent_guid).select()
       return parent[0]
     },
-  },
-  Split: {
-    async quantity (split) {
-      return split.quantity_num / split.quantity_denom
-    },
-    async value (split) {
-      return split.value_num / split.value_denom
-    }
   }
 }
 
-module.exports = resolvers
+module.exports = {
+ accountResolver 
+}
