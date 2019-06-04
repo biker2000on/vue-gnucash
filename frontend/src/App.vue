@@ -17,8 +17,9 @@
           >
         </v-text-field>
       </v-sheet>
+      <v-progress-circular v-if="$apollo.queries.accountTree.loading" indeterminate />
       <v-treeview 
-      :items="accounts"
+      :items="accountTree"
       :search="search"
       activatable
       hoverable
@@ -68,6 +69,13 @@
 
 <script>
 import Table from './components/Table.vue'
+import gql from 'graphql-tag'
+
+const ACCOUNT_TREE = gql`
+  query {
+    accountTree
+  }
+`
 
 const object_in_hierarchy = (guid, accounts) => {
   for (let acct of accounts) {
@@ -129,6 +137,7 @@ export default {
       previous: null,
       separator: ':',
       flatAccounts: [],
+      error: [],
     }
   },
   methods: {
@@ -191,7 +200,15 @@ export default {
   },
   created() {
     this.getFlatAccounts()
-    this.get_accounts()
+    // this.get_accounts()
+  },
+  apollo: {
+    accountTree: {
+      query: ACCOUNT_TREE,
+      error(error) {
+        this.error = JSON.stringify(error.message)
+      }
+    }
   }
 }
 </script>
