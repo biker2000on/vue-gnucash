@@ -4,7 +4,7 @@
   "description": "gnucash node graphql server",
   "main": "index.js",
   "scripts": {
-    "startall": "npm run dev && (cd ../frontend && npm run serve)",
+    "start": "concurrently -n vue,node \"npm run vue\" \"npm run dev\"",
     "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "vue": "(cd ../frontend && npm run serve)"
@@ -17,6 +17,7 @@
     "express": "^4.16.4",
     "express-graphql": "^0.8.0",
     "graphql": "^14.2.1",
+    "graphql-type-json": "^0.3.0",
     "knex": "^0.17.1",
     "sequelize": "^5.8.6",
     "sqlite3": "^4.0.8"

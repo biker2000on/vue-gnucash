@@ -56,18 +56,18 @@ The Recursive Common Table Expression or CTE is able to return the nested struct
 
 ```SQL
 WITH RECURSIVE `ancestors` AS (
-	SELECT a.*, 0 AS depth
+	SELECT a.*, 0 AS depth, a.name as fullname
 	FROM accounts AS a
-	WHERE a.guid = "fd4dd79886327b270a0fa8efe6a07972" 
+	WHERE a.parent_guid = "fd4dd79886327b270a0fa8efe6a07972" 
 	
 	union ALL
 	
-	SELECT a.*, c.depth + 1 AS depth
+	SELECT a.*, c.depth + 1 AS depth, c.fullname || ":" || a.name
 	FROM accounts AS a
 	INNER JOIN ancestors AS c ON c.guid = a.parent_guid
 	)
 
-SELECT * from ancestors
+SELECT fullname, depth, hidden from ancestors
 ```
 
 ## Example Returns nested JSON object

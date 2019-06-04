@@ -8,7 +8,7 @@ const query = gql`
     """
     The accountTree query returns a JSON string of the full hierarchy of accounts including name, guid, and children.
     """
-    accountTree: String
+    accountTree: JSON
   }
 `
 
