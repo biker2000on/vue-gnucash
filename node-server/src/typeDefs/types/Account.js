@@ -10,6 +10,7 @@ const Account = gql`
     commodity: Commodity!
     children: [Account]
     parent: Account
+    fullname: String
     description: String!
     hidden: Boolean
     placeholder: Boolean

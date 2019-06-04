@@ -4,8 +4,10 @@
   "description": "gnucash node graphql server",
   "main": "index.js",
   "scripts": {
+    "startall": "npm run dev && (cd ../frontend && npm run serve)",
     "dev": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "vue": "(cd ../frontend && npm run serve)"
   },
   "author": "",
   "license": "ISC",

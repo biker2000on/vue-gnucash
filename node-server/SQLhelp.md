@@ -69,3 +69,181 @@ WITH RECURSIVE `ancestors` AS (
 
 SELECT * from ancestors
 ```
+
+## Example Returns nested JSON object
+
+<https://bender.io/2013/09/22/returning-hierarchical-data-in-a-single-sql-query/>
+
+```SQL
+WITH RECURSIVE employeetree AS (
+  WITH employeeprojects AS (
+    SELECT
+      p.employee_id,
+      json_agg(p.*) as projects
+    FROM (
+      SELECT
+        p.*,
+        date_part('day', age(now(), dateassigned::timestamp)) as age
+      FROM project p
+    ) AS p
+    GROUP BY p.employee_id
+  )
+
+  SELECT
+    e.*,
+    null::json as superior,
+    COALESCE(ep.projects, '[]') as projects
+  FROM employee e
+  LEFT JOIN employeeprojects ep
+    USING(employee_id)
+  WHERE superior_id IS NULL
+
+  UNION ALL
+
+  SELECT
+    e.*,
+    row_to_json(sup.*) as superior,
+    COALESCE(ep.projects, '[]') as projects
+  FROM employee e
+  INNER JOIN employeetree sup
+    ON sup.employee_id = e.superior_id
+  LEFT JOIN employeeprojects ep
+    ON ep.employee_id = e.employee_id
+)
+
+SELECT *
+FROM employeetree
+WHERE employee_id = 7
+```
+
+## Return a single nested JSON object with root at top
+
+<https://tapoueh.org/blog/2018/01/exporting-a-hierarchy-in-json-with-recursive-queries/>
+
+```SQL
+with recursive dndclasses_from_parents as
+(
+         -- Classes with no parent, our starting point
+      select id, name, '{}'::int[] as parents, 0 as level
+        from dndclasses
+       where parent_id is NULL
+
+   union all
+
+         -- Recursively find sub-classes and append them to the result-set
+      select c.id, c.name, parents || c.parent_id, level+1
+        from      dndclasses_from_parents p
+             join dndclasses c
+               on c.parent_id = p.id
+       where not c.id = any(parents)
+),
+    dndclasses_from_children as
+(
+         -- Now start from the leaf nodes and recurse to the top-level
+         -- Leaf nodes are not parents (level > 0) and have no other row
+         -- pointing to them as their parents, directly or indirectly
+         -- (not id = any(parents))
+     select c.parent_id,
+            json_agg(jsonb_build_object('Name', c.name))::jsonb as js
+       from dndclasses_from_parents tree
+            join dndclasses c using(id)
+      where level > 0 and not id = any(parents)
+   group by c.parent_id
+
+  union all
+
+         -- build our JSON document, one piece at a time
+         -- as we're traversing our graph from the leaf nodes, 
+         -- the bottom-up traversal makes it possible to accumulate
+         -- sub-classes as JSON document parts that we glue together
+     select c.parent_id,
+     
+               jsonb_build_object('Name', c.name)
+            || jsonb_build_object('Sub Classes', js) as js
+
+       from dndclasses_from_children tree
+            join dndclasses c on c.id = tree.parent_id
+)
+-- Finally, the traversal being done, we can aggregate
+-- the top-level classes all into the same JSON document,
+-- an array.
+select jsonb_pretty(jsonb_agg(js))
+  from dndclasses_from_children
+ where parent_id IS NULL;
+ ```
+
+Working on my SQL for recursive tree:
+
+This returns the first half correctly.
+
+```SQL
+with recursive accountclasses_from_parents as
+(
+         -- Classes with no parent, our starting point
+      select guid, name, "" as parents, 0 as level
+        from accounts
+       where guid = "fd4dd79886327b270a0fa8efe6a07972"
+
+   union all
+
+         -- Recursively find sub-classes and append them to the result-set
+      select c.guid, c.name, parents || c.parent_guid, level+1
+        from accountclasses_from_parents p
+             join accounts c
+               on c.parent_guid = p.guid
+       --where not c.guid LIKE '%'||parents||'%'
+)
+select * from accountclasses_from_parents
+```
+
+Second half of this query not exactly correct I guess: 
+
+```SQL
+with recursive accountclasses_from_parents as
+(
+  -- Classes with no parent, our starting point
+  select guid, name, "" as parents, 0 as level
+  from accounts
+  where guid = "fd4dd79886327b270a0fa8efe6a07972"
+
+  union all
+
+  -- Recursively find sub-classes and append them to the result-set
+  select c.guid, c.name, parents || c.parent_guid, level+1
+  from accountclasses_from_parents p
+  join accounts c
+  on c.parent_guid = p.guid
+  --where not c.guid LIKE '%'||parents||'%'
+),
+  accounts_from_children as
+(
+  -- Now start from the leaf nodes and recurse to the top-level
+  -- Leaf nodes are not parents (level > 0) and have no other row
+  -- pointing to them as their parents, directly or indirectly
+  -- (not id = any(parents))
+  select c.parent_guid, json_group_array(json_object('Name', c.name)) as js
+  from accountclasses_from_parents tree
+  join accounts c using(guid)
+  where level > 0 and not guid LIKE '%'||parents||'%'
+  group by c.parent_guid
+
+  union all
+
+  -- build our JSON document, one piece at a time
+  -- as we're traversing our graph from the leaf nodes, 
+  -- the bottom-up traversal makes it possible to accumulate
+  -- sub-classes as JSON document parts that we glue together
+  select c.parent_guid,
+     
+  json_object('Name', c.name) || json_object('Children', js) as js
+
+  from accounts_from_children tree
+  join accounts c on c.guid = tree.parent_guid
+)
+-- Finally, the traversal being done, we can aggregate
+-- the top-level classes all into the same JSON document,
+-- an array.
+select json_group_array(js)
+from accounts_from_children
+where parent_guid IS NULL;
+```
