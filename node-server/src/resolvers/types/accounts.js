@@ -23,6 +23,15 @@ const accountResolver = {
                           .limit(undefined)
       return txs
     },
+    async transactionSplits (account, args, {knex}) {
+      const txSplits = knex('splits').join('transactions as t','splits.tx_guid','t.guid')
+                        .join('splits as s','s.tx_guid','t.guid')
+                        .where('splits.account_guid', account.guid)
+                        .groupBy('t.guid')
+                        .orderBy('t.post_date')
+                        .select('t.*', knex.raw("json_group_array(json_object('account_guid',s.account_guid,'value_num',s.value_num, 'value_denom', s.value_denom, 'quantity_num', s.quantity_num, 'quantity_denom', s.quantity_denom)) as 'splits'"))
+      return txSplits
+    },
     async children (account, args, {knex}) {
       const children = await knex('accounts').where('parent_guid', account.guid).select()
       return children

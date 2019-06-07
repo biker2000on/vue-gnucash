@@ -25,33 +25,20 @@ import DatatableCollective from './datatable/datatable-collection.vue'
 import DatatableColumn from './datatable/datatable-column.vue'
 import Datatable from './datatable/datatable.vue'
 import Toggle from './datatable/toggle.vue'
+import gql from 'graphql-tag'
 
-// var aggregators = vuetiful.aggregators;
-// var formatters = vuetiful.formatters;
-// var currencies = vuetiful.maps.currencies;
-
-// var customers = {
-//     striped: true,
-//     editable: false,
-//     lineNumbers: false,
-//     filter: null,
-
-//     currency: "USD",
-//     dateFormat: "D MMMM YYYY",
-    
-//     columns: [
-//         {
-//             id: "purchase_amount",
-//             label: "Purchase Amount",
-//             width: null,
-//             sortable: true,
-//             groupable: true,
-//             aggregators: [],
-//             // formatter: function (value) {
-//             //     return formatters.currency(value, 2, customers.currency);
-//             // }
-//         }
-//     ],
+const ACCOUNT_TXSPLITS = gql`
+  query {
+    account(guid:"567f74beab5246a99b9610b8f0db3992") {
+      guid
+      transactionSplits {
+        description
+        post_date
+        splits
+      }
+    }
+  }
+`
 
 export default {
   components: {
@@ -62,10 +49,6 @@ export default {
           type: String,
           required: false,
       },
-      splits: {
-          type: Array,
-          required: false
-      },
       flataccounts: {
         type: Array,
         required: true,
@@ -73,6 +56,7 @@ export default {
   },
   data: () => ({
     transactions: [],
+    error: [],
   }), 
   methods: {
   
@@ -80,32 +64,46 @@ export default {
   computed: {
     tableData() {
       const vm = this
-      if (!vm.splits) return []
+      if (!vm.account) return []
+      // console.log(vm.account.transactionSplits)
+      let splits = vm.account.transactionSplits
       // console.log('inside tableData computed property')
       // console.log(vm.splits)
       // console.log(vm.account_guid)
-      let mappedSplits = vm.splits.map(function (c) {
+      let mappedSplits = splits.map(function (c) {
         for (let split of c.splits) {
-          if (split.account_guid == vm.account_guid) {
+          // console.log('inside split map')
+          if (split.account_guid == vm.account.guid) {
             if (split.value > 0) {
-              c['debit'] = split.value
+              c['debit'] = split.value_num / split.value_denom
               c['credit'] = ''
             } else {
               c['debit'] = ''
-              c['credit'] = Math.abs(split.value)
+              c['credit'] = Math.abs(split.value_num / split.value_denom)
             }
           }
         }
         return {
           post_date: c.post_date,
           description: c.description,
-          account: vm.flataccounts[c.splits[0].account_guid],
+          account: 'placeholder', // need account map + logic for which split to display
           debit: c.debit,
           credit: c.credit,
           balance: '',
         }
       })
       return mappedSplits
+    }
+  },
+  apollo: {
+    account: {
+      query: ACCOUNT_TXSPLITS,
+      // variables: {
+      //   guid: '567f74beab5246a99b9610b8f0db3992'
+      // },
+      error(error) {
+        this.error.push(JSON.stringify(error.message))
+      },
     }
   }
 }

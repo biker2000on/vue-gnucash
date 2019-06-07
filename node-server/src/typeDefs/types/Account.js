@@ -16,6 +16,7 @@ const Account = gql`
     placeholder: Boolean
     splits: [Split]
     transactions: [Transaction]
+    transactionSplits: [TransactionSplits]
     depth: Int!
   }
 `

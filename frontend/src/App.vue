@@ -61,7 +61,7 @@
     </v-toolbar>
 
     <v-content>
-      <Table :account_guid="active_account_guid" :flataccounts="flatAccounts" :splits="splits[active_account_guid] ? splits[active_account_guid].results : undefined"/>
+      <Table :account_guid="active_account_guid" :flataccounts="accounts"/>
       <!-- <HelloWorld/> -->
     </v-content>
   </v-app>
@@ -74,6 +74,16 @@ import gql from 'graphql-tag'
 const ACCOUNT_TREE = gql`
   query {
     accountTree
+  }
+`
+
+const ACCOUNTS = gql`
+  query {
+    accounts {
+      guid
+      name
+      fullname
+    }
   }
 `
 
@@ -136,77 +146,37 @@ export default {
       next: null,
       previous: null,
       separator: ':',
-      flatAccounts: [],
       error: [],
     }
   },
   methods: {
-    get_accounts() {
-      axios.get('http://localhost:5000/accounts')
-        .then((response) => this.accounts = response.data)
-        .catch((error) => console.error(error))
-    },
     update_active(e) {
+      console.log(e)
       this.active_account_guid = e[0]
-      this.getSplits(e[0])
     }, 
     open_tab() {
 
-    },
-    getSplits(account_guid) {
-      axios.get('http://localhost:5000/account/' + account_guid + '/transactions')
-        .then((response) => {
-          if (account_guid in this.splits) {
-            this.splits[account_guid].results.concat(response.data.results)
-            this.splits[account_guid].previous = response.data.previous
-            this.splits[account_guid].next = response.data.next
-          } else {
-            this.splits[account_guid] = response.data
-          }
-        })
-        .catch((error) => (console.warn(error)))
-    },
-    moreSplits(url_partial) {
-      axios.get('http://localhost:5000' + url_partial)
-        .then((response) => this.splits.append(response.data.results))
-    },
-    accountName(account, parentName='', separator=':') {
-      const name = parentName + separator + account.name
-      let names = [name]
-      if (Boolean(...account.children)) {
-        for (acc of account.children) {
-          return names.push(...accountName(acc, name, separator))
-        }
-      }
-      return names
-    },
-    getFlatAccounts() {
-      axios.get('http://localhost:5000/accounts_flat')
-        .then(response => {
-          this.flatAccounts = response.data
-        })
     },
   },
   computed: {
     active_account() {
       return object_in_hierarchy(this.active_account_guid, this.accounts)
     },
-    fullnameAccounts() {
-      let all = []
-      for (a of accounts) {
-        all.push(...this.accountName(a,'',separator))
-      }
-    }
   },
   created() {
-    this.getFlatAccounts()
-    // this.get_accounts()
+
   },
   apollo: {
     accountTree: {
       query: ACCOUNT_TREE,
       error(error) {
-        this.error = JSON.stringify(error.message)
+        this.error.push(JSON.stringify(error.message))
+      }
+    },
+    accounts: {
+      query: ACCOUNTS,
+      error(error) {
+        this.error.push(JSON.stringify(error.message))
       }
     }
   }
