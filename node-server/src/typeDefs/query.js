@@ -9,6 +9,10 @@ const query = gql`
     The accountTree query returns a JSON string of the full hierarchy of accounts including name, guid, and children.
     """
     accountTree: JSON
+    """
+    Transactions table query returns the data needed to reconstruct the Gnucash transaction journal.
+    """
+    transactionsTable(guid: String!): [TransactionSplits!]!
   }
 `
 

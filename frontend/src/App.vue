@@ -44,6 +44,7 @@
 
       <template v-slot:extension>
         <v-tabs
+          v-if="tabs.length > 0"
           v-model="active_tab"
           align-with-title
           dark
@@ -54,14 +55,18 @@
             :key="i"
             :href="`#tab-${i}`"
           >
-            Item {{ i }}
+            {{ accountMap[i] ? accountMap[i].name : '' }}
           </v-tab>
         </v-tabs>
       </template>
     </v-toolbar>
 
     <v-content>
-      <Table :account_guid="active_account_guid" :flataccounts="accounts"/>
+      <v-tabs-items v-model="active_tab">
+        <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
+          <Table v-if="active_account_guid" :account_guid="active_tab.slice(4)" :flataccounts="accountMap"/>
+        </v-tab-item>
+      </v-tabs-items>
       <!-- <HelloWorld/> -->
     </v-content>
   </v-app>
@@ -138,6 +143,7 @@ export default {
     return {
       drawer: null,
       accounts: [],
+      accountMap: {},
       search: null,
       active_account_guid: null,
       tabs: [],
@@ -151,8 +157,14 @@ export default {
   },
   methods: {
     update_active(e) {
-      console.log(e)
+      // console.log(e)
       this.active_account_guid = e[0]
+      if (this.tabs.includes(this.active_account_guid)) {
+        this.active_tab = e[0]
+      } else {
+        this.tabs.push(e[0])
+        this.active_tab = 'tab-' + e[0]
+      }
     }, 
     open_tab() {
 
@@ -160,7 +172,7 @@ export default {
   },
   computed: {
     active_account() {
-      return object_in_hierarchy(this.active_account_guid, this.accounts)
+      return object_in_hierarchy(this.active_account_guid, this.accountTree)
     },
   },
   created() {
@@ -175,6 +187,18 @@ export default {
     },
     accounts: {
       query: ACCOUNTS,
+      update(data) {
+        console.log("updating: ")
+        return data.accounts
+      },
+      result(query) {
+        console.log("Results query")
+        let accountMap = {}
+        query.data.accounts.map(c => {
+          accountMap[c.guid] = c
+        })
+        this.accountMap = accountMap
+      },
       error(error) {
         this.error.push(JSON.stringify(error.message))
       }

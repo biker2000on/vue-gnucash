@@ -2,32 +2,32 @@
 
 SELECT 
   CASE
-    WHEN s.value_num > 0 THEN CAST(s.value_num as real) / CAST(s.value_denom as REAL)
-    WHEN s.value_num < 0 THEN NULL
+    WHEN x.value_num > 0 THEN CAST(x.value_num as real) / CAST(x.value_denom as REAL)
+    WHEN x.value_num < 0 THEN NULL
     ELSE 0
-  END as debit_val,
+  END as debit_value,
   CASE
-    WHEN s.value_num > 0 THEN NULL
-    WHEN s.value_num < 0 THEN CAST(ABS(s.value_num) as real) / CAST(s.value_denom as REAL)
+    WHEN x.value_num > 0 THEN NULL
+    WHEN x.value_num < 0 THEN CAST(ABS(x.value_num) as real) / CAST(x.value_denom as REAL)
     ELSE 0
-  END as credit_val,
+  END as credit_value,
   CASE
     WHEN x.quantity_num > 0 THEN CAST(x.quantity_num as real) / CAST(x.quantity_denom as REAL)
     WHEN x.quantity_num < 0 THEN NULL
     ELSE 0
-  END as debit_quant,
+  END as debit_quantity,
   CASE
     WHEN x.quantity_num > 0 THEN NULL
     WHEN x.quantity_num < 0 THEN CAST(ABS(x.quantity_num) as real) / CAST(x.quantity_denom as REAL)
     ELSE 0
-  END as credit_quant,
+  END as credit_quantity,
   max(
     CASE
       WHEN a.account_type != 'TRADING'
       AND s.account_guid != '346723ca372c085551eb2fe8fc3f01f1' THEN a.name
       ELSE NULL
     END
-  ) as account_wanted,
+  ) as 'account_guid',
   a.name,
   t.description,
   t.post_date,
@@ -66,7 +66,7 @@ SELECT
         ELSE 0
       END
     )
-  ) as 'split'
+  ) as 'splits'
 FROM
   splits x
   join transactions t on t.guid = x.tx_guid

@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 /node-server/dist
+test.sql
 
 # local env files
 .env.local

@@ -1,22 +1,25 @@
 <template>
-  <datatable id="data-table-options" :source="tableData" filterable editable striped lineNumbers>
-    <datatable-column id="post_date" label="Date" width="15"></datatable-column>
-    <datatable-column id="description" label="Description" width="20"></datatable-column>
-    <datatable-column id="account" label="Account" width="25"></datatable-column>
-    <datatable-column id="debit" label="Debit" width="10"></datatable-column>
-    <datatable-column id="credit" label="Credit" width="10"></datatable-column>
-    <datatable-column id="balance" label="Balance" width="10"></datatable-column>
-    <template slot="sortable" slot-scope="cell">
-        <div class="datatable-options-toggle">
-            <toggle :id="cell.row.id + '-sortable'" v-model="cell.row.sortable"></toggle>
-        </div>
-    </template>
-    <template slot="groupable" slot-scope="cell">
-        <div class="datatable-options-toggle">
-            <toggle :id="cell.row.id + '-groupable'" v-model="cell.row.groupable"></toggle>
-        </div>   
-    </template>
-  </datatable>
+  <div>
+    <v-progress-circular v-if="$apollo.queries.transactionsTable.loading" indeterminate />
+    <datatable v-if="account_guid" id="data-table-options" :source="transactionsTable" filterable editable striped>
+      <datatable-column id="post_date" label="Date" width="15"></datatable-column>
+      <datatable-column id="description" label="Description" width="20"></datatable-column>
+      <datatable-column id="account_guid" label="Account" width="25"></datatable-column>
+      <datatable-column id="debit_quantity" label="Debit" width="10"></datatable-column>
+      <datatable-column id="credit_quantity" label="Credit" width="10"></datatable-column>
+      <!-- <datatable-column id="balance" label="Balance" width="10"></datatable-column> -->
+      <template slot="sortable" slot-scope="cell">
+          <div class="datatable-options-toggle">
+              <toggle :id="cell.row.id + '-sortable'" v-model="cell.row.sortable"></toggle>
+          </div>
+      </template>
+      <template slot="groupable" slot-scope="cell">
+          <div class="datatable-options-toggle">
+              <toggle :id="cell.row.id + '-groupable'" v-model="cell.row.groupable"></toggle>
+          </div>   
+      </template>
+    </datatable>
+  </div>
 </template>
 
 <script>
@@ -28,14 +31,29 @@ import Toggle from './datatable/toggle.vue'
 import gql from 'graphql-tag'
 
 const ACCOUNT_TXSPLITS = gql`
-  query {
-    account(guid:"567f74beab5246a99b9610b8f0db3992") {
+  query account_txsplits ($guid: String!) {
+    account (guid: $guid) {
       guid
       transactionSplits {
         description
         post_date
         splits
       }
+    }
+  }
+`
+
+const TXTABLE = gql`
+  query ($guid:String!) {
+    transactionsTable(guid:$guid) {
+      account_guid
+      description
+      post_date
+      debit_value
+      credit_value
+      debit_quantity
+      credit_quantity
+      splits
     }
   }
 `
@@ -50,7 +68,7 @@ export default {
           required: false,
       },
       flataccounts: {
-        type: Array,
+        type: Object,
         required: true,
       }
   },
@@ -96,10 +114,34 @@ export default {
     }
   },
   apollo: {
-    account: {
-      query: ACCOUNT_TXSPLITS,
-      // variables: {
-      //   guid: '567f74beab5246a99b9610b8f0db3992'
+    // account: {
+    //   query: ACCOUNT_TXSPLITS,
+    //   // variables: {
+    //   //   guid: '567f74beab5246a99b9610b8f0db3992'
+    //   // },
+    //   error(error) {
+    //     this.error.push(JSON.stringify(error.message))
+    //   },
+    // },
+    transactionsTable: {
+      query: TXTABLE,
+      variables() {
+        return {
+          guid: this.account_guid
+        }
+      },
+      result(queryResult) {
+        queryResult.data.transactionsTable.map(c => {
+          if (c.account_guid) {
+            c.account_guid = this.flataccounts[c.account_guid].fullname
+          }
+          if (!c.account_guid) console.log("blank line")
+        })
+        return queryResult
+        // console.log(queryResult)
+      },
+      // skip() {
+      //   return Boolean(this.account_guid)
       // },
       error(error) {
         this.error.push(JSON.stringify(error.message))
