@@ -3,12 +3,12 @@
 </template>
 
 <script>
-import Tabulator from 'tabulator-tables'
-import gql from 'graphql-tag'
+import Tabulator from "tabulator-tables";
+import gql from "graphql-tag";
 
 const TXTABLE = gql`
-  query ($guid:String!) {
-    transactionsTable(guid:$guid) {
+  query($guid: String!) {
+    transactionsTable(guid: $guid) {
       account_guid
       description
       post_date
@@ -19,16 +19,66 @@ const TXTABLE = gql`
       splits
     }
   }
-`
+`;
 
-const cols = [
-  {title: "Date", field: "post_date"},
-  {title: "Description", field: "description"},
-  {title: "Account", field: "account_guid"},
-  {title: "Debit", field: "debit_quantity"},
-  {title: "Credit", field: "credit_quantity"},
-  {title: "Balance", field: "balance"},
-]
+// const cols = [
+//   { title: "Date", field: "post_date", editor: true, align: "left" },
+//   {
+//     title: "Description",
+//     field: "description",
+//     variableHeight: true,
+//     editor: true,
+//     align: "left"
+//   },
+//   {
+//     title: "Account",
+//     field: "account_guid",
+//     variableHeight: true,
+//     editor: true,
+//     align: "left",
+//     formatter: "lookup",
+//     formatterParams: this.accountMap
+//   },
+//   {
+//     title: "Debit",
+//     field: "debit_quantity",
+//     editor: true,
+//     align: "right",
+//     formatter: "money",
+//     formatterParams: {
+//       decimal: ".",
+//       thousand: ",",
+//       symbol: "$",
+//       precision: 2
+//     }
+//   },
+//   {
+//     title: "Credit",
+//     field: "credit_quantity",
+//     editor: true,
+//     align: "right",
+//     formatter: "money",
+//     formatterParams: {
+//       decimal: ".",
+//       thousand: ",",
+//       symbol: "$",
+//       precision: 2
+//     }
+//   },
+//   {
+//     title: "Balance",
+//     field: "balance",
+//     editor: true,
+//     align: "right",
+//     formatter: "money",
+//     formatterParams: {
+//       decimal: ".",
+//       thousand: ",",
+//       symbol: "$",
+//       precision: 2
+//     }
+//   }
+// ];
 
 export default {
   props: {
@@ -47,24 +97,88 @@ export default {
     transactionsTable: [],
     error: [],
     widths: 20,
-    columns: cols,
+    columns: []
   }),
-  // watch:{
-  //   //update table if data changes
-  //   transactionsTable:{
-  //     handler: function (newData) {
-  //       console.log("newData inside watcher: ", newData)
-  //       this.tabulator.replaceData(newData);
-  //     },
-  //     deep: true,
-  //   }
-  // },
   mounted() {
     this.tabulator = new Tabulator(this.$refs.table, {
       data: this.transactionsTable,
       reactiveData: true,
-      columns: this.columns,
-    })
+      columns: [
+        { title: "Date", field: "post_date", editor: true, align: "left", editor: true },
+        {
+          title: "Description",
+          field: "description",
+          variableHeight: true,
+          editor: true,
+          align: "left"
+        },
+        {
+          title: "Account",
+          field: "account_guid",
+          variableHeight: true,
+          editor: "autocomplete",
+          editorParams: {
+            showListOnEmpty: true,
+            freetext: false,
+            allowEmpty: false,
+            // searchFunc: function(term, values) {
+            //   //search for exact matches
+            //   var matches = [];
+            //   values.forEach(function(item) {
+            //     if (item.value === term) {
+            //       matches.push(item);
+            //     }
+            //   });
+            //   return matches;
+            // },
+            values: this.flataccounts,
+            sortValuesList: "asc"
+          },
+          align: "left",
+          formatter: "lookup",
+          formatterParams: this.flataccounts
+        },
+        {
+          title: "Debit",
+          field: "debit_quantity",
+          editor: "number",
+          align: "right",
+          formatter: "money",
+          formatterParams: {
+            decimal: ".",
+            thousand: ",",
+            symbol: "$",
+            precision: 2
+          }
+        },
+        {
+          title: "Credit",
+          field: "credit_quantity",
+          editor: "number",
+          align: "right",
+          formatter: "money",
+          formatterParams: {
+            decimal: ".",
+            thousand: ",",
+            symbol: "$",
+            precision: 2
+          }
+        },
+        {
+          title: "Balance",
+          field: "balance",
+          align: "right",
+          formatter: "money",
+          formatterParams: {
+            decimal: ".",
+            thousand: ",",
+            symbol: "$",
+            precision: 2
+          }
+        }
+      ],
+      layout: "fitDataFill"
+    });
   },
   apollo: {
     transactionsTable: {
@@ -72,34 +186,37 @@ export default {
       variables() {
         return {
           guid: this.account_guid
-        }
+        };
       },
-      update() {
-        console.log('updating')
+      update(data) {
+        console.log("updating: ", data);
+        return data.transactionsTable;
       },
       result(queryResult) {
-        console.log("result")
-        queryResult.data.transactionsTable.map(c => {
-          if (c.account_guid) {
-            try {
-              c.account_guid = this.flataccounts[c.account_guid].fullname
-            } 
-            catch {
-              
-            }
-          }
-          if (!c.account_guid) console.log("blank line")
-        })
-        this.tabulator.replaceData(queryResult.data.transactionsTable)
-        return queryResult
+        console.log("result");
+        queryResult.data.transactionsTable.reduce((a,c,i) => {
+          // if (c.account_guid) {
+          //   try {
+          //     c.account_guid = this.flataccounts[c.account_guid].fullname;
+          //   } catch {}
+          // }
+          c['balance'] = a + c.debit_quantity - c.credit_quantity
+          a = c.balance
+          try {
+            c.splits = JSON.parse(c.splits);
+          } catch {}
+          return a
+        },0);
+        this.tabulator.replaceData(queryResult.data.transactionsTable);
+        return queryResult;
         // console.log(queryResult)
       },
       // skip() {
       //   return Boolean(this.account_guid)
       // },
       error(error) {
-        this.error.push(JSON.stringify(error.message))
-      },
+        this.error.push(JSON.stringify(error.message));
+      }
     }
   }
 };
@@ -111,5 +228,4 @@ export default {
 div {
   width: 100%;
 }
-
 </style>

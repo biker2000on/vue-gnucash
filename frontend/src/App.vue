@@ -64,7 +64,7 @@
     <v-content>
       <v-tabs-items v-model="active_tab">
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <tabulator v-if="active_account_guid" :account_guid="tab" :flataccounts="accountMap"/>
+          <tabulator v-if="active_account_guid" :account_guid="tab" :flataccounts="accountNameMap"/>
         </v-tab-item>
       </v-tabs-items>
       <!-- <HelloWorld/> -->
@@ -139,6 +139,13 @@ export default {
     active_account() {
       return object_in_hierarchy(this.active_account_guid, this.accountTree)
     },
+    accountNameMap() {
+      const map = {}
+      this.accounts.map(c => {
+        map[c.guid] = c.fullname
+      })
+      return map
+    }
   },
   created() {
 
@@ -159,6 +166,7 @@ export default {
       result(query) {
         // console.log("Results query")
         let accountMap = {}
+        let accountNameMap = {}
         query.data.accounts.map(c => {
           accountMap[c.guid] = c
         })
