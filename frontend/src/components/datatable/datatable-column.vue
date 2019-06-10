@@ -1,5 +1,5 @@
 <template>
-    <th :style="columnStyles" title="Click to sort. Drag to center to group." @click="sort" v-drag:start="dragStart">
+    <th :style="columnStyles" title="Click to sort. Drag to center to group." @click="sort">
         <div class="datatable-column" :layout="columnLayout">
             <div>
                 <slot>{{ label || id }}</slot>

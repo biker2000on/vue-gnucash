@@ -1,6 +1,6 @@
 <template>
     <div class="datatable-collection">
-        <table v-if="groupable" :class="{ 'table-striped': striped }">
+        <table v-if="groupable" :class="{ 'table-striped': striped }" class="table-body">
             <tr v-for="(data, group, index) in groups" :key="'group' + index">
                 <td class="datatable-group" :colspan="columnSpan">
                     <div class="datatable-group-header" layout="row center-justify">

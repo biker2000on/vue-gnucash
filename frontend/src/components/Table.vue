@@ -1,12 +1,12 @@
 <template>
   <div>
     <v-progress-circular v-if="$apollo.queries.transactionsTable.loading" indeterminate />
-    <datatable v-if="account_guid" id="data-table-options" :source="transactionsTable" filterable editable striped>
-      <datatable-column id="post_date" label="Date" width="15"></datatable-column>
+    <datatable v-if="account_guid" id="data-table-options" :source="transactionsTable" filterable striped editable>
+      <datatable-column id="post_date" label="Date" width="20"></datatable-column>
       <datatable-column id="description" label="Description" width="20"></datatable-column>
-      <datatable-column id="account_guid" label="Account" width="25"></datatable-column>
-      <datatable-column id="debit_quantity" label="Debit" width="10"></datatable-column>
-      <datatable-column id="credit_quantity" label="Credit" width="10"></datatable-column>
+      <datatable-column id="account_guid" label="Account" width="20"></datatable-column>
+      <datatable-column id="debit_quantity" label="Debit" width="20"></datatable-column>
+      <datatable-column id="credit_quantity" label="Credit" width="20"></datatable-column>
       <!-- <datatable-column id="balance" label="Balance" width="10"></datatable-column> -->
       <template slot="sortable" slot-scope="cell">
           <div class="datatable-options-toggle">
@@ -29,19 +29,6 @@ import DatatableColumn from './datatable/datatable-column.vue'
 import Datatable from './datatable/datatable.vue'
 import Toggle from './datatable/toggle.vue'
 import gql from 'graphql-tag'
-
-const ACCOUNT_TXSPLITS = gql`
-  query account_txsplits ($guid: String!) {
-    account (guid: $guid) {
-      guid
-      transactionSplits {
-        description
-        post_date
-        splits
-      }
-    }
-  }
-`
 
 const TXTABLE = gql`
   query ($guid:String!) {
@@ -75,6 +62,7 @@ export default {
   data: () => ({
     transactions: [],
     error: [],
+    widths: 20
   }), 
   methods: {
   
@@ -114,15 +102,6 @@ export default {
     }
   },
   apollo: {
-    // account: {
-    //   query: ACCOUNT_TXSPLITS,
-    //   // variables: {
-    //   //   guid: '567f74beab5246a99b9610b8f0db3992'
-    //   // },
-    //   error(error) {
-    //     this.error.push(JSON.stringify(error.message))
-    //   },
-    // },
     transactionsTable: {
       query: TXTABLE,
       variables() {
@@ -133,7 +112,12 @@ export default {
       result(queryResult) {
         queryResult.data.transactionsTable.map(c => {
           if (c.account_guid) {
-            c.account_guid = this.flataccounts[c.account_guid].fullname
+            try {
+              c.account_guid = this.flataccounts[c.account_guid].fullname
+            } 
+            catch {
+              
+            }
           }
           if (!c.account_guid) console.log("blank line")
         })
@@ -154,6 +138,6 @@ export default {
 <style>
   #data-table-options {
       width: 100%;
-      height: 100%;
+      /* height: 100%; */
   }
 </style>
