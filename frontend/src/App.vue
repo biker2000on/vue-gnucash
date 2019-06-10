@@ -64,7 +64,7 @@
     <v-content>
       <v-tabs-items v-model="active_tab">
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <Table v-if="active_account_guid" :account_guid="active_tab.slice(4)" :flataccounts="accountMap"/>
+          <tabulator v-if="active_account_guid" :account_guid="tab" :flataccounts="accountMap"/>
         </v-tab-item>
       </v-tabs-items>
       <!-- <HelloWorld/> -->
@@ -73,7 +73,8 @@
 </template>
 
 <script>
-import Table from './components/Table.vue'
+import Tabulator from './components/Tabulator.vue'
+// import Table from './components/Table.vue'
 import gql from 'graphql-tag'
 import object_in_hierarchy from './utilities/object-in-hierarchy'
 
@@ -96,7 +97,8 @@ const ACCOUNTS = gql`
 export default {
   name: 'App',
   components: {
-    Table
+    // Table,
+    Tabulator,
   },
   data () {
     return {
