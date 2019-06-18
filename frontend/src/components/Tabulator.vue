@@ -9,6 +9,7 @@ import gql from "graphql-tag";
 const TXTABLE = gql`
   query($guid: String!) {
     transactionsTable(guid: $guid) {
+      guid
       account_guid
       description
       post_date
@@ -44,6 +45,11 @@ export default {
     this.tabulator = new Tabulator(this.$refs.table, {
       data: this.transactionsTable,
       reactiveData: true,
+      cellEdited: function(cell) {
+        // console.log(cell._cell.row)
+        console.log(cell._cell.column.field)
+        console.log(cell._cell.row.data)
+      },
       columns: [
         { title: "Date", field: "post_date", editor: true, align: "left", editor: true, minWidth: 100, },
         {
@@ -119,7 +125,7 @@ export default {
         }
       ],
       layout: "fitDataFill"
-    });
+    })
   },
   apollo: {
     transactionsTable: {
@@ -168,6 +174,6 @@ export default {
 
 div {
   width: 100%;
-  height: 500px;
+  height: 600px;
 }
 </style>
