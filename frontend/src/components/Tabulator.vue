@@ -21,65 +21,6 @@ const TXTABLE = gql`
   }
 `;
 
-// const cols = [
-//   { title: "Date", field: "post_date", editor: true, align: "left" },
-//   {
-//     title: "Description",
-//     field: "description",
-//     variableHeight: true,
-//     editor: true,
-//     align: "left"
-//   },
-//   {
-//     title: "Account",
-//     field: "account_guid",
-//     variableHeight: true,
-//     editor: true,
-//     align: "left",
-//     formatter: "lookup",
-//     formatterParams: this.accountMap
-//   },
-//   {
-//     title: "Debit",
-//     field: "debit_quantity",
-//     editor: true,
-//     align: "right",
-//     formatter: "money",
-//     formatterParams: {
-//       decimal: ".",
-//       thousand: ",",
-//       symbol: "$",
-//       precision: 2
-//     }
-//   },
-//   {
-//     title: "Credit",
-//     field: "credit_quantity",
-//     editor: true,
-//     align: "right",
-//     formatter: "money",
-//     formatterParams: {
-//       decimal: ".",
-//       thousand: ",",
-//       symbol: "$",
-//       precision: 2
-//     }
-//   },
-//   {
-//     title: "Balance",
-//     field: "balance",
-//     editor: true,
-//     align: "right",
-//     formatter: "money",
-//     formatterParams: {
-//       decimal: ".",
-//       thousand: ",",
-//       symbol: "$",
-//       precision: 2
-//     }
-//   }
-// ];
-
 export default {
   props: {
     account_guid: {
@@ -104,7 +45,7 @@ export default {
       data: this.transactionsTable,
       reactiveData: true,
       columns: [
-        { title: "Date", field: "post_date", editor: true, align: "left", editor: true },
+        { title: "Date", field: "post_date", editor: true, align: "left", editor: true, minWidth: 100, },
         {
           title: "Description",
           field: "description",
@@ -227,5 +168,6 @@ export default {
 
 div {
   width: 100%;
+  height: 500px;
 }
 </style>
