@@ -2,7 +2,7 @@ const uuidv4 = require('uuid/v4')
 
 const transactionResolver = {
   Mutation: {
-    async transaction (root, args, {knex}) {
+    async updateTransaction (root, args, {knex}) {
       console.log("root", root)
       console.log("args", args)
       console.log('uuid', uuidv4().replace(/-/g,''))
