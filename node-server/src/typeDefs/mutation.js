@@ -5,15 +5,23 @@ const mutation = gql`
     """
     Update a transactions metadata and not the splits.
     """
-    updateTransaction(guid: String!, description: String, post_date: String): Transaction
-    """
-    Insert a new transaction that is a simple transfer with only 2 accounts. 
-    """
-    insertTransaction(description: String, post_date: String, from_account_guid: ID, to_account_guid: ID, from_value: Float, to_value: Float): Transaction
+    updateTransaction(
+      guid: String!, 
+      description: String, 
+      post_date: String
+    ): Transaction
     """
     Insert a new transaction with multiple splits.
     """
-    insertTransactionSplits(description: String, post_date: String, account_guids: [ID], values: [Float], quantities: [Float]): Transaction
+    insertTransaction(
+      description: String! "transaction description", 
+      post_date: String!, 
+      account_guids: [ID!]! "array of all account_guids for all splits", 
+      values: [Float!]!, 
+      quantities: [Float], 
+      memos: [String],
+      actions: [Actions],
+    ): Transaction
   }
 `
 
