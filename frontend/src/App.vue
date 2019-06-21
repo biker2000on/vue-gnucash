@@ -1,6 +1,7 @@
 <template>
   <v-app>
-    <v-navigation-drawer
+    <Navigation :accountTree="accountTree" @update-account="update_active($event)" />
+    <!-- <v-navigation-drawer
       v-model="drawer"
       app
     >
@@ -26,7 +27,7 @@
       item-key="guid"
       @update:active="update_active($event)"
        />
-    </v-navigation-drawer>
+    </v-navigation-drawer> -->
     <v-toolbar fixed app dark color="primary">
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class="headline text-uppercase">
@@ -74,7 +75,7 @@
 
 <script>
 import Tabulator from './components/Tabulator.vue'
-// import Table from './components/Table.vue'
+import Navigation from './components/Navigation'
 import gql from 'graphql-tag'
 import object_in_hierarchy from './utilities/object-in-hierarchy'
 
@@ -99,6 +100,7 @@ export default {
   components: {
     // Table,
     Tabulator,
+    Navigation,
   },
   data () {
     return {
