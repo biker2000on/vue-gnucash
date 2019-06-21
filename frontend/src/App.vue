@@ -1,33 +1,6 @@
 <template>
   <v-app>
     <Navigation :accountTree="accountTree" @update-account="update_active($event)" />
-    <!-- <v-navigation-drawer
-      v-model="drawer"
-      app
-    >
-      <v-sheet class="pa-3 primary ">
-        <v-text-field
-            v-model="search"
-            label="Search Account Tree"
-            dark
-            flat
-            solo-inverted
-            hide-details
-            clearable
-            clear-icon="mdi-close-circle-outline"
-          >
-        </v-text-field>
-      </v-sheet>
-      <v-progress-circular v-if="$apollo.queries.accountTree.loading" indeterminate />
-      <v-treeview 
-      :items="accountTree"
-      :search="search"
-      activatable
-      hoverable
-      item-key="guid"
-      @update:active="update_active($event)"
-       />
-    </v-navigation-drawer> -->
     <v-toolbar fixed app dark color="primary">
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class="headline text-uppercase">
@@ -65,7 +38,7 @@
     <v-content>
       <v-tabs-items v-model="active_tab">
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <tabulator v-if="active_account_guid" :account_guid="tab" :flataccounts="accountNameMap"/>
+          <account-tabulator v-if="active_account_guid" :account_guid="tab" :flataccounts="accountNameMap"/>
         </v-tab-item>
       </v-tabs-items>
       <!-- <HelloWorld/> -->
@@ -78,6 +51,7 @@ import Tabulator from './components/Tabulator.vue'
 import Navigation from './components/Navigation'
 import gql from 'graphql-tag'
 import object_in_hierarchy from './utilities/object-in-hierarchy'
+import AccountTabulator from './components/AccountTabulator'
 
 const ACCOUNT_TREE = gql`
   query {
@@ -101,6 +75,7 @@ export default {
     // Table,
     Tabulator,
     Navigation,
+    AccountTabulator,
   },
   data () {
     return {

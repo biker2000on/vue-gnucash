@@ -7,25 +7,25 @@
     <v-list>
       <v-list-tile>
         <v-list-tile-action>
-          <v-icon>home</v-icon>
+          <v-icon color="primary">home</v-icon>
         </v-list-tile-action>
         <v-list-tile-title>Home</v-list-tile-title>
       </v-list-tile>
       <v-list-tile>
         <v-list-tile-action>
-          <v-icon>home</v-icon>
+          <v-icon>attach_money</v-icon>
         </v-list-tile-action>
         <v-list-tile-title>Budget</v-list-tile-title>
       </v-list-tile>
       <v-list-tile>
         <v-list-tile-action>
-          <v-icon>home</v-icon>
+          <v-icon>timeline</v-icon>
         </v-list-tile-action>
         <v-list-tile-title>Reports</v-list-tile-title>
       </v-list-tile>
 
       <v-list-group
-        prepend-icon="account_circle"
+        prepend-icon="account_balance"
         value="true"
       >
         <template v-slot:activator>
@@ -110,7 +110,7 @@ export default {
   props: {
     accountTree: {
       type: Array,
-      required: true,
+      required: false,
     }
   },
   data() {
