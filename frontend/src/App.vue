@@ -1,8 +1,8 @@
 <template>
   <v-app>
-    <Navigation :accountTree="accountTree" @update-account="update_active($event)" />
+    <Navigation :accountTree="accountTree" @update-account="update_active($event)" :drawer.sync="drawer" />
     <v-toolbar fixed app dark color="primary">
-      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+      <v-toolbar-side-icon @click.stop="toggleNav($event)"></v-toolbar-side-icon>
       <v-toolbar-title class="headline text-uppercase">
         Gnucash Vue GraphQL
       </v-toolbar-title>
@@ -24,24 +24,32 @@
           color="primary"
           dark
         >
+          <v-tab key="accountTree1" href="#tab-accountTree1">
+            Accounts 
+          </v-tab>
           <v-tab
             v-for="i in tabs"
             :key="i"
             :href="`#tab-${i}`"
           >
-            {{ accountMap[i] ? accountMap[i].name + ' ' : '' }} <span @click="closeTab(i)" class="close error">x</span>
+            {{ flattenedAccountsMap[i] ? flattenedAccountsMap[i].name + ' ' : '' }} <span @click="closeTab(i)" class="close error">x</span>
           </v-tab>
         </v-tabs>
       </template>
     </v-toolbar>
 
     <v-content>
+      <!-- <v-container fill-height> -->
       <v-tabs-items v-model="active_tab">
+        <v-tab-item>
+          <!-- <account-tree-tabulator v-if="accountTree" :accountTree="accountTree" /> -->
+          Account Tree here.
+        </v-tab-item>
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <account-tabulator v-if="active_account_guid" :account_guid="tab" :flataccounts="accountNameMap"/>
+          <account-tabulator v-if="active_account_guid" :account_guid="tab" :flataccounts="flattenedAccountsMap"/>
         </v-tab-item>
       </v-tabs-items>
-      <!-- <HelloWorld/> -->
+      <!-- </v-container> -->
     </v-content>
   </v-app>
 </template>
@@ -52,6 +60,8 @@ import Navigation from './components/Navigation'
 import gql from 'graphql-tag'
 import object_in_hierarchy from './utilities/object-in-hierarchy'
 import AccountTabulator from './components/AccountTabulator'
+import {flattenToObject} from './utilities/flattenTree'
+import AccountTreeTabulator from './components/AccountTreeTabulator'
 
 const ACCOUNT_TREE = gql`
   query {
@@ -59,43 +69,28 @@ const ACCOUNT_TREE = gql`
   }
 `
 
-const ACCOUNTS = gql`
-  query {
-    accounts {
-      guid
-      name
-      fullname
-    }
-  }
-`
-
 export default {
   name: 'App',
   components: {
-    // Table,
     Tabulator,
     Navigation,
     AccountTabulator,
+    AccountTreeTabulator,
   },
   data () {
     return {
       drawer: null,
-      accounts: [],
-      accountMap: {},
       search: null,
       active_account_guid: null,
       tabs: [],
       active_tab: null,
       splits: {},
-      next: null,
-      previous: null,
       separator: ':',
       error: [],
     }
   },
   methods: {
     update_active(e) {
-      // console.log(e, "update_active")
       this.active_account_guid = e[0]
       if (e[0]) {
         if (this.tabs.includes(undefined)) {this.tabs.pop(this.tabs.indexOf(undefined))}
@@ -108,20 +103,26 @@ export default {
       }
     }, 
     closeTab(key) {
-      // console.log(key, this.accountMap[key].fullname)
       if (this.tabs.includes(key)) {this.tabs.splice(this.tabs.indexOf(key),1)}
+    },
+    toggleNav(e) {
+      this.drawer = !this.drawer
     }
   },
   computed: {
     active_account() {
       return object_in_hierarchy(this.active_account_guid, this.accountTree)
     },
-    accountNameMap() {
-      const map = {}
-      this.accounts.map(c => {
-        map[c.guid] = c.fullname
-      })
-      return map
+    flattenedAccountsMap() {
+      return flattenToObject(
+        this.accountTree,
+        node => node.children,
+        node => {
+          let {children, guid, ...flat} = node
+          return flat
+        },
+        node => node.guid
+      )
     }
   },
   created() {
@@ -134,25 +135,6 @@ export default {
         this.error.push(JSON.stringify(error.message))
       }
     },
-    accounts: {
-      query: ACCOUNTS,
-      update(data) {
-        // console.log("updating: ")
-        return data.accounts
-      },
-      result(query) {
-        // console.log("Results query")
-        let accountMap = {}
-        let accountNameMap = {}
-        query.data.accounts.map(c => {
-          accountMap[c.guid] = c
-        })
-        this.accountMap = accountMap
-      },
-      error(error) {
-        this.error.push(JSON.stringify(error.message))
-      }
-    }
   }
 }
 </script>

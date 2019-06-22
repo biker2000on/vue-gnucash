@@ -96,11 +96,14 @@ export default {
             //   });
             //   return matches;
             // },
-            values: this.flataccounts,
+            values: this.flataccounts.fullname,
             sortValuesList: "asc"
           },
           align: "left",
-          formatter: "lookup",
+          formatter: function(cell, formatterParams, onRendered) {
+            const val = cell.getValue()
+            return formatterParams[val] ? formatterParams[val].fullname : val
+          },
           formatterParams: this.flataccounts
         },
         {
