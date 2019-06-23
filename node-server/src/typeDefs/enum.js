@@ -1,7 +1,7 @@
 const { gql } = require('apollo-server')
 
 const enums = gql`
-  enum Account_type {
+  enum Account_Type {
     TRADING
     EXPENSE
     INCOME
