@@ -2,7 +2,8 @@ const {gql} = require('apollo-server')
 
 const Book = gql`
   type Book {
-    root_account: Account!
+    root_account_guid: ID!
+    root_template_guid: ID!
   }
 `
 

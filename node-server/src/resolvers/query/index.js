@@ -4,6 +4,7 @@ const {balancesResolver} = require('./balances')
 const {accountTreeResolver} = require('./accountTree')
 const {transactionsTableResolver} = require('./transactionsTable')
 const {commoditiesResolver} = require('./commodities')
+const {booksResolver} = require('./books')
 
 const queryResolvers = [
   accountResolver,
@@ -12,6 +13,7 @@ const queryResolvers = [
   balancesResolver,
   transactionsTableResolver,
   commoditiesResolver,
+  booksResolver,
 ]
 
 module.exports = {

@@ -7,6 +7,7 @@ const Transaction = gql`
     post_date: String!
     enter_date: String!
     description: String!
+    notes: String
     splits: [Split!]!
   }
 
