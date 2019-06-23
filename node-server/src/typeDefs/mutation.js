@@ -42,6 +42,8 @@ const mutation = gql`
     quantity: Float
     memo: String
     action: Actions
+    reconcile_state: String
+    reconcile_date: String
   }
 `
 

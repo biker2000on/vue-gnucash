@@ -13,6 +13,7 @@ const query = gql`
     Transactions table query returns the data needed to reconstruct the Gnucash transaction journal.
     """
     transactionsTable(guid: String!): [TransactionSplits!]!
+    commodities: [Commodity!]!
   }
 `
 

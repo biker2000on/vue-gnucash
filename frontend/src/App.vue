@@ -24,9 +24,9 @@
           color="primary"
           dark
         >
-          <v-tab key="accountTree1" href="#tab-accountTree1">
+          <!-- <v-tab key="accountTree1" href="#tab-accountTree1">
             Accounts 
-          </v-tab>
+          </v-tab> -->
           <v-tab
             v-for="i in tabs"
             :key="i"
@@ -41,12 +41,17 @@
     <v-content>
       <!-- <v-container fill-height> -->
       <v-tabs-items v-model="active_tab">
-        <v-tab-item>
+        <!-- <v-tab-item> -->
           <!-- <account-tree-tabulator v-if="accountTree" :accountTree="accountTree" /> -->
-          Account Tree here.
-        </v-tab-item>
+          <!-- Account Tree here. -->
+        <!-- </v-tab-item> -->
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <account-tabulator v-if="active_account_guid" :account_guid="tab" :flataccounts="flattenedAccountsMap"/>
+          <account-tabulator 
+          v-if="active_account_guid" 
+          :account_guid="tab" 
+          :flataccounts="accountNameMap"
+          :commodity="active_commodity"
+          />
         </v-tab-item>
       </v-tabs-items>
       <!-- </v-container> -->
@@ -58,14 +63,22 @@
 import Tabulator from './components/Tabulator.vue'
 import Navigation from './components/Navigation'
 import gql from 'graphql-tag'
-import object_in_hierarchy from './utilities/object-in-hierarchy'
 import AccountTabulator from './components/AccountTabulator'
 import {flattenToObject} from './utilities/flattenTree'
-import AccountTreeTabulator from './components/AccountTreeTabulator'
+// import AccountTreeTabulator from './components/AccountTreeTabulator'
 
 const ACCOUNT_TREE = gql`
   query {
     accountTree
+  }
+`
+
+const COMMODITIES = gql`
+  query {
+    commodities {
+      guid
+      mnemonic
+    }
   }
 `
 
@@ -75,13 +88,14 @@ export default {
     Tabulator,
     Navigation,
     AccountTabulator,
-    AccountTreeTabulator,
+    // AccountTreeTabulator,
   },
   data () {
     return {
       drawer: null,
       search: null,
       active_account_guid: null,
+      active_account: null,
       tabs: [],
       active_tab: null,
       splits: {},
@@ -91,14 +105,16 @@ export default {
   },
   methods: {
     update_active(e) {
-      this.active_account_guid = e[0]
       if (e[0]) {
+        const {children, ...account} = e[0] 
+        this.active_account = account
+        this.active_account_guid = e[0].guid
         if (this.tabs.includes(undefined)) {this.tabs.pop(this.tabs.indexOf(undefined))}
         if (this.tabs.includes(this.active_account_guid)) {
-          this.active_tab = e[0]
+          this.active_tab = e[0].guid
         } else {
-          this.tabs.push(e[0])
-          this.active_tab = 'tab-' + e[0]
+          this.tabs.push(e[0].guid)
+          this.active_tab = 'tab-' + e[0].guid
         }
       }
     }, 
@@ -110,9 +126,6 @@ export default {
     }
   },
   computed: {
-    active_account() {
-      return object_in_hierarchy(this.active_account_guid, this.accountTree)
-    },
     flattenedAccountsMap() {
       return flattenToObject(
         this.accountTree,
@@ -123,6 +136,24 @@ export default {
         },
         node => node.guid
       )
+    },
+    accountNameMap() {
+      return flattenToObject(
+        this.accountTree,
+        node => node.children,
+        node => node.fullname,
+        node => node.guid
+      )
+    },
+    commoditityMap() {
+      let map = {}
+      this.commodities.map(c => {
+        return map[c.guid] = c.mnemonic
+      })
+      return map
+    },
+    active_commodity() {
+      return this.commoditityMap[this.active_account.commodity_guid]
     }
   },
   created() {
@@ -135,6 +166,12 @@ export default {
         this.error.push(JSON.stringify(error.message))
       }
     },
+    commodities: {
+      query: COMMODITIES,
+      error(error) {
+        this.error.push(JSON.stringify(error.message))
+      }
+    }
   }
 }
 </script>

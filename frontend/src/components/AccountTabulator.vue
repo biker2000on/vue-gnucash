@@ -10,6 +10,7 @@
 <script>
 import gql from "graphql-tag";
 import Tabulator from "./Tabulator";
+import getSymbolFromCurrency from 'currency-symbol-map'
 
 const TXTABLE = gql`
   query($guid: String!) {
@@ -51,6 +52,11 @@ export default {
       default: function () {
         return {}
       }
+    },
+    commodity: {
+      type: String,
+      required: false,
+      default: 'USD',
     }
   },
   data: () => ({
@@ -96,13 +102,13 @@ export default {
             //   });
             //   return matches;
             // },
-            values: this.flataccounts.fullname,
+            values: this.flataccounts,
             sortValuesList: "asc"
           },
           align: "left",
           formatter: function(cell, formatterParams, onRendered) {
             const val = cell.getValue()
-            return formatterParams[val] ? formatterParams[val].fullname : val
+            return formatterParams[val] ? formatterParams[val] : val
           },
           formatterParams: this.flataccounts
         },
@@ -115,7 +121,7 @@ export default {
           formatterParams: {
             decimal: ".",
             thousand: ",",
-            symbol: "$",
+            symbol: this.symbol,
             precision: 2
           }
         },
@@ -128,7 +134,7 @@ export default {
           formatterParams: {
             decimal: ".",
             thousand: ",",
-            symbol: "$",
+            symbol: this.symbol,
             precision: 2
           }
         },
@@ -140,11 +146,15 @@ export default {
           formatterParams: {
             decimal: ".",
             thousand: ",",
-            symbol: "$",
+            symbol: this.symbol,
             precision: 2
           }
         }
       ];
+    },
+    symbol() {
+      const symbol = getSymbolFromCurrency(this.commodity)
+      return symbol ? symbol : this.commodity
     }
   },
   mounted() {
