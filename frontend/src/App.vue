@@ -39,9 +39,8 @@
       <!-- <v-container fill-height> -->
       <v-tabs-items v-model="active_tab">
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <account-tree-slimgrid v-if="tab == 'accountTree1' && accountTree" :accountTree="accountTree" />
-          <account-slimgrid 
-          v-if="active_account_guid  && accountNameMap && tab != 'accountTree1'" 
+          <account-sync-grid 
+          v-if="active_account_guid" 
           :account_guid="tab" 
           :flataccounts="accountNameMap"
           :commodity="active_commodity"
@@ -54,11 +53,10 @@
 </template>
 
 <script>
-import AccountSlimgrid from './components/AccountSlimgrid.vue'
 import Navigation from './components/Navigation'
 import gql from 'graphql-tag'
+import AccountSyncGrid from './components/AccountSyncGrid'
 import {flattenToObject} from './utilities/flattenTree'
-import AccountTreeSlimgrid from './components/AccountTreeSlimgrid'
 
 const ACCOUNT_TREE = gql`
   query {
@@ -79,8 +77,7 @@ export default {
   name: 'App',
   components: {
     Navigation,
-    AccountSlimgrid,
-    AccountTreeSlimgrid,
+    AccountSyncGrid,
   },
   data () {
     return {

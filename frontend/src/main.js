@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import './plugins/vuetify'
+import './plugins/syncfusion'
 import App from './App.vue'
 import axios from 'axios'
 import directives from "./directives/directives";

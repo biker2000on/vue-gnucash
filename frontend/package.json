@@ -10,6 +10,7 @@
     "node": "cd ../node-server && npm run dev"
   },
   "dependencies": {
+    "@syncfusion/ej2-vue-grids": "^17.1.51",
     "apollo-cache-inmemory": "^1.6.0",
     "apollo-client": "^2.6.0",
     "apollo-link-http": "^1.5.14",
