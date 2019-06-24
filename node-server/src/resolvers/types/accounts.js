@@ -19,8 +19,9 @@ const accountResolver = {
     async transactions (account, args, {knex}) {
       const txs = await knex('splits').where('splits.account_guid', account.guid)
                           .join('transactions as t','splits.tx_guid','t.guid')
-                          .select('t.*')
-                          .limit(undefined)
+                          .leftJoin('slots as s', 's.obj_guid', 't.guid')
+                          .where('s.name',"notes")
+                          .select('t.*','s.string_val as note')
       return txs
     },
     async transactionSplits (account, args, {knex}) {
@@ -40,26 +41,6 @@ const accountResolver = {
       const parent = await knex('accounts').where('guid',account.parent_guid).select()
       return parent[0]
     },
-    // async fullname (account, args, {knex}) {
-    //   const fullnameRows = await knex.withRecursive('ancestors', (qb) => {
-    //     qb.select('accounts.*', knex.raw('0 as depth')).from('accounts').where('guid', account.guid).unionAll((qb) => {
-    //       qb.select('accounts.*', knex.raw('ancestors.depth + 1 as depth')).from('accounts').join('ancestors','ancestors.parent_guid','accounts.guid')
-    //     })
-    //   }).select('name','depth').from('ancestors').orderBy('depth', 'desc')
-    //   console.log(fullnameRows)
-    //   const separator = ';'
-    //   const fullname = fullnameRows.reduce((a,c,i) => {
-    //     if (i > 0) {
-    //       if (i < fullnameRows.length - 1) {
-    //         a += c.name + separator
-    //       } else {
-    //         a += c.name
-    //       }
-    //     }
-    //     return a
-    //   },'')
-    //   return fullname
-    // }
   }
 }
 
