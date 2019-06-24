@@ -46,7 +46,7 @@
           <!-- Account Tree here. -->
         <!-- </v-tab-item> -->
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <account-tabulator 
+          <account-slimgrid 
           v-if="active_account_guid" 
           :account_guid="tab" 
           :flataccounts="accountNameMap"
@@ -60,10 +60,10 @@
 </template>
 
 <script>
-import Tabulator from './components/Tabulator.vue'
+import AccountSlimgrid from './components/AccountSlimgrid.vue'
 import Navigation from './components/Navigation'
 import gql from 'graphql-tag'
-import AccountTabulator from './components/AccountTabulator'
+// import AccountTabulator from './components/AccountTabulator'
 import {flattenToObject} from './utilities/flattenTree'
 // import AccountTreeTabulator from './components/AccountTreeTabulator'
 
@@ -85,9 +85,9 @@ const COMMODITIES = gql`
 export default {
   name: 'App',
   components: {
-    Tabulator,
+    // Tabulator,
     Navigation,
-    AccountTabulator,
+    AccountSlimgrid,
     // AccountTreeTabulator,
   },
   data () {
