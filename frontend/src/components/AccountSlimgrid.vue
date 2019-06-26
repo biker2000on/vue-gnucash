@@ -1,15 +1,24 @@
 <template>
-  <slim-grid 
-    pk="guid"
-    :data="transactionsTable"
-    :column-options="columnOptions"
+  <slim-grid v-if="flataccounts" 
+    pk="guid" 
+    :data="transactionsTable" 
+    :column-options="columnOptions" 
+    :height="550" 
+    forceFitColumns 
+    fullWidthRows 
+    editable
+    enableAddRow
+    leaveSpaceForNewRows
+    :downloadable="false"
+
   />
 </template>
 
 <script>
 import gql from "graphql-tag";
-import SlimGrid from 'vue-slimgrid'
-import getSymbolFromCurrency from 'currency-symbol-map'
+import SlimGrid from "vue-slimgrid";
+import getSymbolFromCurrency from "currency-symbol-map";
+import { Editors } from 'slickgrid-es6'
 
 const TXTABLE = gql`
   query($guid: String!) {
@@ -27,6 +36,10 @@ const TXTABLE = gql`
   }
 `;
 
+const options = {
+  forceFitColumns: true,
+}
+
 export default {
   components: {
     SlimGrid
@@ -39,142 +52,99 @@ export default {
     flataccounts: {
       type: Object,
       required: false,
-      default: function () {
-        return {}
+      default: function() {
+        return {};
       }
     },
     commodity: {
       type: String,
       required: false,
-      default: 'USD',
+      default: "USD"
     }
   },
   data: () => ({
     transactionsTable: [],
     error: [],
     widths: 20,
-    columnOptions: {
-      '*': {  // all column / default options
-
-      }, 
-      splits: {
-        columns: [
-          {
-            id: "debit_value",
-            name: 'Debit'
-          },
-          {
-            id: "credit_value",
-            name: "Credit"
-          },
-          {
-            id: 'account_guid',
-            name: 'Account'
-          }
-        ]
-      },
-      __typename: {
-        hidden: true
-      },
-      debit_quantity: {hidden: true},
-      credit_quantity: {hidden: true},
-    }
+    options: options
   }),
   computed: {
-    columns() {
-      return [
-        {
-          title: "Date",
-          field: "post_date",
-          editor: true,
-          align: "left",
-          editor: true,
-          minWidth: 100
+    columnOptions() {
+      console.log("editor: ",Editors)
+      const self = this
+      return {
+        "*": {
+          editor: Editors.Text
+          // all column / default options
         },
-        {
-          title: "Description",
-          field: "description",
-          variableHeight: true,
-          editor: true,
-          align: "left"
+        post_date: {
+          name: "Date",
+          width: 100,
+          order: 1
         },
-        {
-          title: "Account",
-          field: "account_guid",
-          variableHeight: true,
-          editor: "autocomplete",
-          editorParams: {
-            showListOnEmpty: true,
-            freetext: false,
-            allowEmpty: false,
-            // searchFunc: function(term, values) {
-            //   //search for exact matches
-            //   var matches = [];
-            //   values.forEach(function(item) {
-            //     if (item.value === term) {
-            //       matches.push(item);
-            //     }
-            //   });
-            //   return matches;
-            // },
-            values: this.flataccounts,
-            sortValuesList: "asc"
+        description: {
+          name: "Description",
+          cssClass: 'text-left',
+          order: 2,
+          minWidth: 100,
+          // editor: Editors.Text
+        },
+        account_guid: {
+          name: "Account",
+          cssClass: 'text-left',
+          width: 300,
+          formatter: function(row, cell, value, columnDef, dataContext) {
+            return self.flataccounts[value];
           },
-          align: "left",
-          formatter: function(cell, formatterParams, onRendered) {
-            const val = cell.getValue()
-            return formatterParams[val] ? formatterParams[val] : val
-          },
-          formatterParams: this.flataccounts
+          order: 3,
         },
-        {
-          title: "Debit",
-          field: "debit_quantity",
-          editor: "number",
-          align: "right",
-          formatter: "money",
-          formatterParams: {
-            decimal: ".",
-            thousand: ",",
-            symbol: this.symbol,
-            precision: 2
-          }
+        debit_value: {
+          name: "Debit",
+          minWidth: 100,
+          order: 4,
+          // editor: Editors.Number
         },
-        {
-          title: "Credit",
-          field: "credit_quantity",
-          editor: "number",
-          align: "right",
-          formatter: "money",
-          formatterParams: {
-            decimal: ".",
-            thousand: ",",
-            symbol: this.symbol,
-            precision: 2
-          }
+        credit_value: {
+          name: "Credit",
+          minWidth: 100,
+          order: 5, 
         },
-        {
-          title: "Balance",
-          field: "balance",
-          align: "right",
-          formatter: "money",
-          formatterParams: {
-            decimal: ".",
-            thousand: ",",
-            symbol: this.symbol,
-            precision: 2
-          }
-        }
-      ];
+        balance: {
+          name: "Balance",
+          minWidth: 100,
+          order: 6,
+        },
+        splits: {
+          columns: [
+            {
+              id: "debit_value",
+              name: "Debit",
+              width: 100
+            },
+            {
+              id: "credit_value",
+              name: "Credit",
+              width: 100
+            },
+            {
+              id: "account_guid",
+              name: "Account",
+              width: 200
+            }
+          ],
+          hidden: true,
+        },
+        __typename: { hidden: true },
+        debit_quantity: { hidden: true },
+        credit_quantity: { hidden: true },
+      };
     },
     symbol() {
-      const symbol = getSymbolFromCurrency(this.commodity)
-      return symbol ? symbol : this.commodity
+      const symbol = getSymbolFromCurrency(this.commodity);
+      return symbol ? symbol : this.commodity;
     }
   },
-  mounted() {
-
-  },
+  mounted() {},
   apollo: {
     transactionsTable: {
       query: TXTABLE,
@@ -217,9 +187,8 @@ export default {
 </script>
 
 <style>
+@import "../../node_modules/vue-slimgrid/dist/slimgrid.css";
 
-  @import "../../node_modules/vue-slimgrid/dist/slimgrid.css";
-  
 </style>
 
 

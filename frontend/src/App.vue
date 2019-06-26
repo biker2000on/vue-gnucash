@@ -24,9 +24,9 @@
           color="primary"
           dark
         >
-          <!-- <v-tab key="accountTree1" href="#tab-accountTree1">
+          <v-tab key="accountTree1" href="#tab-accountTree1">
             Accounts 
-          </v-tab> -->
+          </v-tab>
           <v-tab
             v-for="i in tabs"
             :key="i"
@@ -41,13 +41,13 @@
     <v-content>
       <!-- <v-container fill-height> -->
       <v-tabs-items v-model="active_tab">
-        <!-- <v-tab-item> -->
-          <!-- <account-tree-tabulator v-if="accountTree" :accountTree="accountTree" /> -->
-          <!-- Account Tree here. -->
-        <!-- </v-tab-item> -->
+        <v-tab-item>
+          <account-tree-slimgrid v-if="accountTree" :accountTree="accountTree" />
+          Account Tree here.
+        </v-tab-item>
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
           <account-slimgrid 
-          v-if="active_account_guid" 
+          v-if="active_account_guid  && accountNameMap" 
           :account_guid="tab" 
           :flataccounts="accountNameMap"
           :commodity="active_commodity"
@@ -63,9 +63,8 @@
 import AccountSlimgrid from './components/AccountSlimgrid.vue'
 import Navigation from './components/Navigation'
 import gql from 'graphql-tag'
-// import AccountTabulator from './components/AccountTabulator'
 import {flattenToObject} from './utilities/flattenTree'
-// import AccountTreeTabulator from './components/AccountTreeTabulator'
+import AccountTreeSlimgrid from './components/AccountTreeSlimgrid'
 
 const ACCOUNT_TREE = gql`
   query {
@@ -85,10 +84,9 @@ const COMMODITIES = gql`
 export default {
   name: 'App',
   components: {
-    // Tabulator,
     Navigation,
     AccountSlimgrid,
-    // AccountTreeTabulator,
+    AccountTreeSlimgrid,
   },
   data () {
     return {
