@@ -8,18 +8,15 @@ export default {
    * Performs initial underlying setup/rendering of the grid.
    */
   init() {
+    console.log('init this', this)
     this.fireSlimGridEvent("onBeforeInit", {});
-    console.log('add event listener')
     this.createDataView();
-    console.log('create dataview')
     this.generateColumns();
-    console.log('create columns')
     this.generateFilters();
-    console.log('generate filters')
     this.createSlickGrid();
-    console.log('create grid')
     this.registerPlugins();
     this.registerEvents();
+    this.treeViewCollapseBehaivor()
 
     this.slickGrid.init();
 
@@ -417,13 +414,7 @@ export default {
 
     const treeFormatter = function(row, cell, value, columnDef, dataContext) {
       const self2 = self
-      console.log('row', row)
-      console.log('cell',cell)
-      console.log('value',value)
-      console.log('datacontext', dataContext)
-      console.log('this', self2)
       if (value == null || value == undefined || dataContext === undefined) {
-        console.log('skipped', value, dataContext)
         return "";
       }
 
@@ -435,14 +426,13 @@ export default {
         "<span style='display:inline-block;height:1px;width:" +
         15 * dataContext["depth"] +
         "px'></span>";
-      console.log('spacer ', spacer, dataContext)
       var idx = self2.dataView.getIdxById(dataContext.guid);
-      if (self2.data[idx + 1] && self2.data[idx + 1].indent > self2.data[idx].depth) {
+      if (self2.data[idx + 1] && self2.data[idx + 1].depth > self2.data[idx].depth) {
         if (dataContext._collapsed) {
-          return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
+          return spacer + " <span class='toggle expand material-icons'>add</span>&nbsp;" + value;
         } else {
           return (
-            spacer + " <span class='toggle collapse'></span>&nbsp;" + value
+            spacer + " <span class='toggle collapse material-icons'>remove</span>&nbsp;" + value
           );
         }
       } else {
@@ -550,5 +540,26 @@ export default {
 
     this.slickGrid.invalidate();
     this.slickGrid.resizeCanvas();
+  },
+
+  treeViewCollapseBehaivor() {
+    const self = this
+    if (this.treeFilter) {
+      this.slickGrid.onClick.subscribe(function (e, args) {
+        if ($(e.target).hasClass("toggle")) {
+          var item = self.dataView.getItem(args.row);
+          if (item) {
+            if (!item._collapsed) {
+              item._collapsed = true;
+            } else {
+              item._collapsed = false;
+            }
+            console.log(item)
+            self.dataView.updateItem(item.guid, item);
+          }
+          e.stopImmediatePropagation();
+        }
+      });
+    }
   }
 };

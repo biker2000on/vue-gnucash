@@ -6,14 +6,17 @@ export default Filter;
 // https://stackoverflow.com/a/16779331
 //
 function Filter(item) {
+  const self = this
   if (this.treeFilter) {
-    if (item.parent_guid != null) {
-      var parent = this.data[item.parent_guid];
-      while (parent) {
+    console.log('inside treefilter')
+    if (item.depth > 0) {
+      var parent = self.data[self.dataView.getIdxById(item.parent_guid)];
+      console.log('parent', parent)
+      while (parent.depth > 0) {
         if (parent._collapsed) {
           return false;
         }
-        parent = this.data[parent.parent_guid];
+        parent = self.data[self.dataView.getIdxById(parent.parent_guid)];
       }
     }
     return true;
