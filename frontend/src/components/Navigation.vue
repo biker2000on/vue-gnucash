@@ -2,19 +2,19 @@
 <template>
   <v-navigation-drawer app :value="drawer" @input="$emit('update:drawer',$event)">
     <v-list>
-      <v-list-tile>
+      <v-list-tile @click="$emit('home-click',$event)">
         <v-list-tile-action>
           <v-icon color="primary">home</v-icon>
         </v-list-tile-action>
         <v-list-tile-title>Home</v-list-tile-title>
       </v-list-tile>
-      <v-list-tile>
+      <v-list-tile @click="">
         <v-list-tile-action>
           <v-icon>attach_money</v-icon>
         </v-list-tile-action>
         <v-list-tile-title>Budget</v-list-tile-title>
       </v-list-tile>
-      <v-list-tile>
+      <v-list-tile @click=""> 
         <v-list-tile-action>
           <v-icon>timeline</v-icon>
         </v-list-tile-action>

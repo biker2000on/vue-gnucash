@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <Navigation :accountTree="accountTree" @update-account="update_active($event)" :drawer.sync="drawer" />
+    <Navigation :accountTree="accountTree" @update-account="update_active($event)" :drawer.sync="drawer" @home-click="goHome($event)" />
     <v-toolbar fixed app dark color="primary">
       <v-toolbar-side-icon @click.stop="toggleNav($event)"></v-toolbar-side-icon>
       <v-toolbar-title class="headline text-uppercase">
@@ -17,22 +17,19 @@
 
       <template v-slot:extension>
         <v-tabs
-          v-if="tabs.length > 0"
+          v-if="tabs.length"
           v-model="active_tab"
           align-with-title
           slider-color="accent"
           color="primary"
           dark
         >
-          <v-tab key="accountTree1" href="#tab-accountTree1">
-            Accounts 
-          </v-tab>
           <v-tab
             v-for="i in tabs"
             :key="i"
             :href="`#tab-${i}`"
           >
-            {{ flattenedAccountsMap[i] ? flattenedAccountsMap[i].name + ' ' : '' }} <span @click="closeTab(i)" class="close error">x</span>
+            {{ i == 'accountTree1' ? 'Accounts' : '' }}{{ flattenedAccountsMap[i] ? flattenedAccountsMap[i].name + ' ' : '' }} <span @click="closeTab(i)" class="close error">x</span>
           </v-tab>
         </v-tabs>
       </template>
@@ -41,13 +38,10 @@
     <v-content>
       <!-- <v-container fill-height> -->
       <v-tabs-items v-model="active_tab">
-        <v-tab-item>
-          <account-tree-slimgrid v-if="accountTree" :accountTree="accountTree" />
-          Account Tree here.
-        </v-tab-item>
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
+          <account-tree-slimgrid v-if="tab == 'accountTree1' && accountTree" :accountTree="accountTree" />
           <account-slimgrid 
-          v-if="active_account_guid  && accountNameMap" 
+          v-if="active_account_guid  && accountNameMap && tab != 'accountTree1'" 
           :account_guid="tab" 
           :flataccounts="accountNameMap"
           :commodity="active_commodity"
@@ -94,7 +88,7 @@ export default {
       search: null,
       active_account_guid: null,
       active_account: null,
-      tabs: [],
+      tabs: ['accountTree1'],
       active_tab: null,
       splits: {},
       separator: ':',
@@ -102,6 +96,12 @@ export default {
     }
   },
   methods: {
+    goHome(e) {
+      if (!this.tabs.includes('accountTree1')) {
+        this.tabs.unshift('accountTree1')
+      }
+      this.active_tab = 'tab-accountTree1'
+    },
     update_active(e) {
       if (e[0]) {
         const {children, ...account} = e[0] 

@@ -10,7 +10,7 @@
     fullWidthRows
     :downloadable="false"
     treeFilter
-    :showHiddenRows="true"
+    :showHiddenRows="showHidden"
   />
 </template>
 
