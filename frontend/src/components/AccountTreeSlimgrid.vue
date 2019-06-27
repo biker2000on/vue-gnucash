@@ -43,37 +43,6 @@ export default {
         name: {
           name: "Name",
           cssClass: "text-left",
-          formatter: function(row, cell, value, columnDef, dataContext) {
-            // console.log("formatter");
-            // console.log(row, cell, value, columnDef, dataContext);
-            // return value;
-            if (value == null || value == undefined || dataContext === undefined) {
-              console.log('skipped', value, dataContext)
-              return "";
-            }
-
-            value = value
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;");
-            var spacer =
-              "<span style='display:inline-block;height:1px;width:" +
-              15 * dataContext["depth"] +
-              "px'></span>";
-            console.log('spacer ', spacer, dataContext)
-            var idx = this.dataView.getIdxById(dataContext.guid);
-            if (this.data[idx + 1] && this.data[idx + 1].indent > this.data[idx].depth) {
-              if (dataContext._collapsed) {
-                return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
-              } else {
-                return (
-                  spacer + " <span class='toggle collapse'></span>&nbsp;" + value
-                );
-              }
-            } else {
-              return spacer + " <span class='toggle'></span>&nbsp;" + value;
-            }
-          }
         },
         description: {
           name: "Description",

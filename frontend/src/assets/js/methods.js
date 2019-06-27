@@ -9,11 +9,15 @@ export default {
    */
   init() {
     this.fireSlimGridEvent("onBeforeInit", {});
-
-    this.generateColumns();
-    this.generateFilters();
+    console.log('add event listener')
     this.createDataView();
+    console.log('create dataview')
+    this.generateColumns();
+    console.log('create columns')
+    this.generateFilters();
+    console.log('generate filters')
     this.createSlickGrid();
+    console.log('create grid')
     this.registerPlugins();
     this.registerEvents();
 
@@ -128,6 +132,7 @@ export default {
 
     // Set row grouping if there's any that need to happen.
     this.setDataViewGrouping(this.grouping);
+    console.log('dataview inside')
   },
 
   /**
@@ -408,6 +413,43 @@ export default {
    */
   getColumnOptions(column, idx) {
     // The default column options.
+    const self = this
+
+    const treeFormatter = function(row, cell, value, columnDef, dataContext) {
+      const self2 = self
+      console.log('row', row)
+      console.log('cell',cell)
+      console.log('value',value)
+      console.log('datacontext', dataContext)
+      console.log('this', self2)
+      if (value == null || value == undefined || dataContext === undefined) {
+        console.log('skipped', value, dataContext)
+        return "";
+      }
+
+      value = value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      var spacer =
+        "<span style='display:inline-block;height:1px;width:" +
+        15 * dataContext["depth"] +
+        "px'></span>";
+      console.log('spacer ', spacer, dataContext)
+      var idx = self2.dataView.getIdxById(dataContext.guid);
+      if (self2.data[idx + 1] && self2.data[idx + 1].indent > self2.data[idx].depth) {
+        if (dataContext._collapsed) {
+          return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
+        } else {
+          return (
+            spacer + " <span class='toggle collapse'></span>&nbsp;" + value
+          );
+        }
+      } else {
+        return spacer + " <span class='toggle'></span>&nbsp;" + value;
+      }
+    }
+
     let defaults = {
       order: idx,
       id: column,
@@ -432,6 +474,10 @@ export default {
       }
     };
 
+    if (this.treeFilter && defaults.order == 0) {
+      defaults.formatter = treeFormatter
+    }
+
     // Merge existing column settings (since width can change with resize, etc.)
     this.mergeExistingColumnSettings(defaults, column);
 
@@ -445,12 +491,12 @@ export default {
     if (this.columnOptions.hasOwnProperty("*")) {
       _.merge(defaults, this.columnOptions["*"]);
     }
-
     // Override specific default column options with user preferences (takes precedence over 'all' option).
     if (this.columnOptions.hasOwnProperty(column)) {
-      _.merge(defaults, this.columnOptions[column]);
+      let {...colOpts} = this.columnOptions[column]
+      _.merge(defaults, colOpts);
     }
-
+    console.log('defaults', defaults)
     return _.mapValues(defaults, (value, key) => {
       return _.isFunction(value) && ["groupTotalsFormatter", "formatter", "hidden", "order", "editor"].indexOf(key) === -1 ? value(defaults) : value;
     });
