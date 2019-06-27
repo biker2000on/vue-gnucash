@@ -18,7 +18,7 @@
 import gql from "graphql-tag";
 import SlimGrid from "vue-slimgrid";
 import getSymbolFromCurrency from "currency-symbol-map";
-import { Editors } from 'slickgrid-es6'
+import { Editors } from 'slickgrid-es6' 
 
 const TXTABLE = gql`
   query($guid: String!) {
