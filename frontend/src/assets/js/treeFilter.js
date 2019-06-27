@@ -7,13 +7,17 @@ export default Filter;
 //
 function Filter(item) {
   const self = this
+  if (!self.showHiddenRows) {
+    if (item[self.hiddenRowsKey]) {
+      return false
+    }
+  }
+
   if (this.treeFilter) {
-    console.log('inside treefilter')
     if (item.depth > 0) {
       var parent = self.data[self.dataView.getIdxById(item.parent_guid)];
-      console.log('parent', parent)
-      while (parent.depth > 0) {
-        if (parent._collapsed) {
+      while (parent) {
+        if (parent._collapsed || parent[self.hiddenRowsKey]) {
           return false;
         }
         parent = self.data[self.dataView.getIdxById(parent.parent_guid)];

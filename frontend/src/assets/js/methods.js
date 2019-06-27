@@ -8,7 +8,6 @@ export default {
    * Performs initial underlying setup/rendering of the grid.
    */
   init() {
-    console.log('init this', this)
     this.fireSlimGridEvent("onBeforeInit", {});
     this.createDataView();
     this.generateColumns();
@@ -129,7 +128,6 @@ export default {
 
     // Set row grouping if there's any that need to happen.
     this.setDataViewGrouping(this.grouping);
-    console.log('dataview inside')
   },
 
   /**
@@ -307,7 +305,11 @@ export default {
    */
   setDataViewData() {
     if (!this.dataView) return;
-
+    // if (this.treeFilter && !this.treeStartExpanded) {
+    //   this.data = this.data.map(c => {
+    //     return {...c, '_collapsed': true}
+    //   })
+    // }
     this.dataView.setItems(this.data, this.pk);
   },
 
@@ -486,7 +488,6 @@ export default {
       let {...colOpts} = this.columnOptions[column]
       _.merge(defaults, colOpts);
     }
-    console.log('defaults', defaults)
     return _.mapValues(defaults, (value, key) => {
       return _.isFunction(value) && ["groupTotalsFormatter", "formatter", "hidden", "order", "editor"].indexOf(key) === -1 ? value(defaults) : value;
     });
@@ -554,7 +555,6 @@ export default {
             } else {
               item._collapsed = false;
             }
-            console.log(item)
             self.dataView.updateItem(item.guid, item);
           }
           e.stopImmediatePropagation();

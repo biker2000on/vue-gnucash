@@ -220,5 +220,17 @@ export default {
   treeFilter: {
     type: Boolean,
     default: false,
-  }
+  },
+  showHiddenRows: {
+    type: Boolean,
+    default: false,
+  },
+  hiddenRowsKey: {
+    type: String,
+    default: 'hidden'
+  },
+  treeStartExpanded: {
+    type: Boolean,
+    default: false,
+  },
 }

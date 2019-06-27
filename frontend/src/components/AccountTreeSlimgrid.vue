@@ -10,6 +10,7 @@
     fullWidthRows
     :downloadable="false"
     treeFilter
+    :showHiddenRows="true"
   />
 </template>
 
@@ -27,7 +28,9 @@ export default {
       required: true
     }
   },
-  data: () => ({}),
+  data: () => ({
+    showHidden: false,
+  }),
   methods: {
     filter() {
       return true;
