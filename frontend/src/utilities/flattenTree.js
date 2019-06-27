@@ -37,7 +37,7 @@ const flattenToArray = function (
       }
     }
   }
-  console.log("Flat AccountMap", flatObject)
+  // console.log("Flat AccountMap", flatObject)
   return flat;
 }
 
