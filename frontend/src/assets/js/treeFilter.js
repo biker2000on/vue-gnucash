@@ -7,17 +7,21 @@ export default Filter;
 //
 function Filter(item) {
   const self = this
+  const boundPatternFilter = patternFilter.bind(self)
+
   if (!self.showHiddenRows) {
     if (item[self.hiddenRowsKey]) {
       return false
     }
   }
 
+  const patternMatch = boundPatternFilter(item)
+
   if (this.treeFilter) {
     if (item.depth > 0) {
       var parent = self.data[self.dataView.getIdxById(item.parent_guid)];
       while (parent) {
-        if (parent._collapsed || parent[self.hiddenRowsKey]) {
+        if ( ( parent._collapsed || parent[self.hiddenRowsKey] )) {
           return false;
         }
         parent = self.data[self.dataView.getIdxById(parent.parent_guid)];
@@ -25,11 +29,14 @@ function Filter(item) {
     }
     return true;
   }
+  return patternMatch
+}
+
+function patternFilter(item) {
   // Regex pattern to validate numbers
   // a number negative/positive with decimals with/without $, %
   var patRegex_no = /^[$]?[-+]?[0-9.,]*[$%]?$/;
   var value = true;
-
   for (var i = 0; i < this.columns.length; i++) {
     var col = this.columns[i];
     var filterValues = col.filterValues;
@@ -109,8 +116,7 @@ function Filter(item) {
       }
     }
   }
-
-  return value; //&& filter.call(grid, item);
+  return value;
 }
 
 function testCondition(condition, value1, value2) {

@@ -72,7 +72,7 @@ export default {
     },
     accountTree: {
       type: Array,
-      default: []
+      default: () => []
     }
   },
   data: () => ({

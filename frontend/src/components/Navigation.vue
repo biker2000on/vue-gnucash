@@ -24,7 +24,7 @@
           <v-list-tile-action>
             <v-icon>settings</v-icon>
           </v-list-tile-action>
-          <v-list-tile-title>Accounts</v-list-tile-title>
+          <v-list-tile-title>Accounts Filter</v-list-tile-title>
         </v-list-tile>
         <v-list-tile @click="openBudgetSettings">
           <v-list-tile-action>
