@@ -8,13 +8,44 @@
         </v-list-tile-action>
         <v-list-tile-title>Home</v-list-tile-title>
       </v-list-tile>
-      <v-list-tile @click="">
+      <v-list-group prepend-icon="settings" value="true">
+        <template v-slot:activator>
+          <v-list-tile>
+            <v-list-tile-title>Settings</v-list-tile-title>
+          </v-list-tile>
+        </template>
+        <v-list-tile @click="openTransactionSettings">
+          <v-list-tile-action>
+            <v-icon>settings</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-title>Transaction Journal</v-list-tile-title>
+        </v-list-tile>
+        <v-list-tile @click="openViewableSettings">
+          <v-list-tile-action>
+            <v-icon>settings</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-title>Accounts</v-list-tile-title>
+        </v-list-tile>
+        <v-list-tile @click="openBudgetSettings">
+          <v-list-tile-action>
+            <v-icon>settings</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-title>Budget</v-list-tile-title>
+        </v-list-tile>
+        <v-list-tile @click="openReportSettings">
+          <v-list-tile-action>
+            <v-icon>settings</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-title>Report</v-list-tile-title>
+        </v-list-tile>
+      </v-list-group>
+      <v-list-tile @click.stop>
         <v-list-tile-action>
           <v-icon>attach_money</v-icon>
         </v-list-tile-action>
         <v-list-tile-title>Budget</v-list-tile-title>
       </v-list-tile>
-      <v-list-tile @click=""> 
+      <v-list-tile @click.stop>
         <v-list-tile-action>
           <v-icon>timeline</v-icon>
         </v-list-tile-action>
@@ -51,12 +82,30 @@
         />
       </v-list-group>
     </v-list>
+    <account-settings :dialog.sync="accountSettingsDialog"/>
+    <budget-settings :dialog.sync="budgetSettingsDialog"/>
+    <report-settings :dialog.sync="reportSettingsDialog" :accountTree="accountTree" />
+    <transaction-settings :dialog.sync="transactionSettingsDialog"/>
+    <viewable-account-settings :dialog.sync="viewableSettingsDialog" />
   </v-navigation-drawer>
 </template>
 
 <script>
+import AccountSettings from "./Settings/AccountSettings";
+import BudgetSettings from "./Settings/BudgetSettings";
+import ReportSettings from "./Settings/ReportSettings";
+import TransactionSettings from "./Settings/TransactionSettings";
+import ViewableAccountSettings from './Settings/ViewableAccountSettings'
+
 export default {
   name: "Navigation",
+  components: {
+    AccountSettings,
+    BudgetSettings,
+    ReportSettings,
+    TransactionSettings,
+    ViewableAccountSettings
+  },
   props: {
     accountTree: {
       type: Array,
@@ -70,7 +119,12 @@ export default {
   },
   data() {
     return {
-      search: null
+      search: null,
+      accountSettingsDialog: false,
+      budgetSettingsDialog: false,
+      reportSettingsDialog: false,
+      transactionSettingsDialog: false,
+      viewableSettingsDialog: false,
     };
   },
   methods: {
@@ -78,9 +132,24 @@ export default {
       this.$emit("update-account", e);
     },
     updateDrawer(e) {
-      console.log("input event", e)
-      this.$emit("update-drawer",e)
+      console.log("input event", e);
+      this.$emit("update-drawer", e);
     },
+    openAccountSettings(e) {
+      this.accountSettingsDialog = !this.accountSettingsDialog;
+    },
+    openBudgetSettings(e) {
+      this.budgetSettingsDialog = !this.budgetSettingsDialog;
+    },
+    openReportSettings(e) {
+      this.reportSettingsDialog = !this.reportSettingsDialog;
+    },
+    openTransactionSettings(e) {
+      this.transactionSettingsDialog = !this.transactionSettingsDialog;
+    },
+    openViewableSettings(e) {
+      this.viewableSettingsDialog = !this.viewableSettingsDialog
+    }
   }
 };
 </script>

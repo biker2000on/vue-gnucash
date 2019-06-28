@@ -40,7 +40,7 @@ export default {
     columnOptions() {
       return {
         "*": {
-          // headerInput: false,
+          cssClass: 'text-left'
           // headerFilter: false,
         },
         name: {
