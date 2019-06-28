@@ -28,6 +28,15 @@ const mutation = gql`
     insertAccount(
       account: InsertAccountInput!
     ): Account
+
+    insertBudget(
+      budget: InsertBudgetInput!
+    ): Budget 
+
+    updateBudget(
+      budget: UpdateBudgetInput!
+    ): Budget 
+
   }
 
   input InsertSplitInput {
@@ -82,6 +91,31 @@ const mutation = gql`
     hidden: Boolean
     "Should this account have transactions / splits associated with it?"
     placeholder: Boolean
+  }
+
+  input InsertBudgetInput {
+    name: String!
+    """
+    Optional budget description.
+    """
+    description: String
+    """
+    This number should be the total number of periods, whether in weeks, months, quarters, etc...
+    """
+    num_periods: Int!
+  }
+
+  input UpdateBudgetInput {
+    guid: ID!
+    name: String
+    """
+    Optional budget description.
+    """
+    description: String
+    """
+    This number should be the total number of periods, whether in weeks, months, quarters, etc...
+    """
+    num_periods: Int
   }
 `
 
