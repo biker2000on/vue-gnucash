@@ -5,11 +5,13 @@ const {Commodity} = require('./Commodity')
 const {Lot} = require('./Lot')
 const {Split} = require('./Split')
 const {Transaction} = require('./Transaction')
+const {Budget} = require('./Budget')
 
 const types = [
   Account,
   Balance,
   Book,
+  Budget,
   Commodity,
   Lot,
   Split,
