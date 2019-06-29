@@ -24,6 +24,19 @@ const enums = gql`
     Decrease
     Sell
   }
+
+  enum Periods { # need to be lowercased when applied to db.
+    DAY
+    WEEK
+    MONTH
+    YEAR
+  }
+
+  enum WeekendAdjust { # need to be lowercased when applied to db.
+    NONE
+    BACK
+    FORWARD
+  }
 `
 
 module.exports = {
