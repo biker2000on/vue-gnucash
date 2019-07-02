@@ -1,6 +1,6 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog :value="dialog" @input="$emit('update:dialog',$event)" max-width="600px">
+    <v-dialog :value="dialog" @input="$emit('update:dialog')" max-width="600px">
       <v-card>
         <v-card-title>
           <span class="headline">Report Settings: {{ title }}</span>
@@ -55,8 +55,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click="dialog = false">Close</v-btn>
-          <v-btn color="blue darken-1" flat @click="dialog = false">Save</v-btn>
+          <!-- <v-btn color="blue darken-1" flat @click="close()">Close</v-btn> -->
+          <v-btn color="blue darken-1" flat @click="saveLocal()">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -78,6 +78,31 @@ export default {
   data: () => ({
     title: null,
     selectedAccounts: [],
-  })
+  }),
+  methods: {
+    // close(e) {
+    //   $emit('update:dialog',$event)
+    // },
+    saveLocal(e) {
+      const savedData = {
+        title: this.title,
+        selectedAccounts: this.selectedAccounts
+      }
+      console.log(savedData)
+      // $emit('update:dialog',$event)
+      window.localStorage.setItem('report_settings',JSON.stringify(savedData))
+    },
+    getLocal() {
+      let saved = window.localStorage.getItem('report_settings')
+      if (saved) {
+        saved = JSON.parse(saved)
+        this.title = saved.title
+        this.selectedAccounts = saved.selectedAccounts
+      }
+    }
+  },
+  mounted() {
+    this.getLocal()
+  }
 };
 </script>
