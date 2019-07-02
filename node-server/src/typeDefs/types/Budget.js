@@ -11,12 +11,15 @@ const Budget = gql`
     Id from the recurrences table. Auto-incrementing Integer
     """
     id: Int!
+    """
+    Multiplier on the period type, ie every 2 weeks. 3 months = 1 quarter, etc...
+    """
     recurrence_mult: Int!
     recurrence_period_type: Periods!
     """
     This is the start date of a budget or scheduled transaction in the form 'yyyymmdd'
     """
-    recurrence_period_start: Text!
+    recurrence_period_start: String!
     """
     Can be none, back, forward
     """

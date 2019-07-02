@@ -26,16 +26,16 @@ const enums = gql`
   }
 
   enum Periods { # need to be lowercased when applied to db.
-    DAY
-    WEEK
-    MONTH
-    YEAR
+    day
+    week
+    month
+    year
   }
 
   enum WeekendAdjust { # need to be lowercased when applied to db.
-    NONE
-    BACK
-    FORWARD
+    none
+    back
+    forward
   }
 `
 
