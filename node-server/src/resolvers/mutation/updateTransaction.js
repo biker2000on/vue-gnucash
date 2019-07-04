@@ -1,6 +1,6 @@
 const moment = require('moment')
 
-const transactionResolver = {
+const updateTransactionResolver = {
   Mutation: {
     async updateTransaction(root, args, {
       knex
@@ -64,5 +64,5 @@ const transactionResolver = {
 }
 
 module.exports = {
-  transactionResolver
+  updateTransactionResolver
 }

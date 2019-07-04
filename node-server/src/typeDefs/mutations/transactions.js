@@ -20,6 +20,10 @@ const transactions = gql`
       post_date: String!
       splits: [InsertSplitInput]
     ): Transaction
+
+    deleteTransaction(
+      guid: ID!
+    ): Int
   }
 
   input InsertSplitInput {

@@ -6,6 +6,9 @@ const insertAccountResolver = {
       knex
     }) {
       const account = args.account
+      account.commodity_guid = "6bb5a4a2b2390043f8517de6cff31f5f"
+      account.commodity_scu = 100
+      account.non_std_scu = 0
       const accountGuid = uuidv4().replace(/-/g, '')
       account['guid'] = accountGuid
       await knex('accounts').insert(account)

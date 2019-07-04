@@ -9,6 +9,10 @@ const budgets = gql`
     updateBudget(
       budget: UpdateBudgetInput!
     ): Budget 
+
+    deleteBudget(
+      guid: ID!
+    ): Int
   }
 
   input InsertBudgetInput {

@@ -12,6 +12,12 @@ const budgetAmounts = gql`
       budget_guid: ID!
       amounts: [UpdateBudgetAmountInput!]!
     ): [BudgetAmounts!]!
+    deleteBudgetAmounts(
+      """
+      This value is an array of GUIDs to delete multiple budget amounts at the same time.
+      """
+      id: [ID!]!
+    ): Int
   }
 
   input InsertBudgetAmountInput {

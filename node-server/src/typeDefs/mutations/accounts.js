@@ -9,6 +9,10 @@ const accounts = gql`
     insertAccount(
       account: InsertAccountInput!
     ): Account
+
+    deleteAccount(
+      guid: ID!
+    ): Int
   }
 
   input InsertAccountInput {
