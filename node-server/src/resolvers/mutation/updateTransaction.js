@@ -34,28 +34,21 @@ const updateTransactionResolver = {
 
 
         let retVal = await knex.transaction(async (trx) => {
-          // for (let rate of Object.keys(rate)) {
-          //   let value = rate[key];
-          //   await trx('currency_exchange_rates')
-          //   .update({ rate: value }).where('currency', key);
-          // }
           for (let split of splits) {
             await trx('splits').update(split).where('guid', split.guid)
           }
+          const transaction = {}
+          transaction['enter_date'] = moment().format('YYYY-MM-DD kk:mm:ss')
+          if (args.description) transaction['description'] = args.description
+          if (args.post_date) transaction['post_date'] = moment(args.post_date).format('YYYY-MM-DD kk:mm:ss') // yyyy-mm-dd hh:mm:ss kk is 24 hours
+          if (args.num) transaction['num'] = args.num // default is "" Text(2048)
+          if (args.currency_guid) transaction['currency_guid'] = args.currency_guid
+    
+          await trx('transactions').where('guid', args.guid).update(transaction)
           return "woo done"; // this value is returned from transaction 
         });
 
       }
-
-      const transaction = {}
-      transaction['enter_date'] = moment().format('YYYY-MM-DD kk:mm:ss')
-      if (args.description) transaction['description'] = args.description
-      if (args.post_date) transaction['post_date'] = moment(args.post_date).format('YYYY-MM-DD kk:mm:ss') // yyyy-mm-dd hh:mm:ss kk is 24 hours
-      if (args.num) transaction['num'] = args.num // default is "" Text(2048)
-      if (args.currency_guid) transaction['currency_guid'] = args.currency_guid
-
-      const update = await knex('transactions').where('guid', args.guid).update(transaction)
-      // console.log("update", update) // returns number of rows updated
 
       const trans = await knex('transactions').select().where('guid', args.guid)
       return trans[0]
