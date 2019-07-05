@@ -1,7 +1,7 @@
 <template>
   <slim-grid v-if="flataccounts" 
     pk="guid" 
-    :data="transactionsTable" 
+    :data="accounts[0].transactions" 
     :column-options="columnOptions" 
     :height="550" 
     forceFitColumns 
@@ -10,7 +10,7 @@
     enableAddRow
     leaveSpaceForNewRows
     :downloadable="false"
-
+    @cell-change="editHandler"
   />
 </template>
 
@@ -18,23 +18,62 @@
 import gql from "graphql-tag";
 import SlimGrid from "vue-slimgrid";
 import getSymbolFromCurrency from "currency-symbol-map";
+import moment from 'moment'
 import { Editors } from 'slickgrid-es6' 
 
 const TXTABLE = gql`
-  query($guid: String!) {
-    transactionsTable(guid: $guid) {
+  query getAccounts($guid: String) {
+    accounts(guid: $guid) {
       guid
-      account_guid
-      description
-      post_date
-      debit_value
-      credit_value
-      debit_quantity
-      credit_quantity
-      splits
+      name
+      transactions {
+        guid
+        post_date
+        # enter_date
+        description
+        note
+        splits {
+          guid
+          account_guid
+          memo
+          action
+          reconcile_state
+          reconcile_date
+          value
+          quantity
+        }
+      }
     }
   }
-`;
+`
+
+const TRANSACTION_UPDATE = gql`
+  mutation (
+    $guid: String!,
+    $description:String,
+    $post_date:String,
+    $splits:[UpdateSplitInput]
+  ) {
+    updateTransaction (
+      guid:$guid,
+      description:$description,
+      post_date:$post_date,
+      splits:$splits
+    ) {
+      guid
+      note
+      post_date
+      enter_date
+      description
+      splits {
+        guid
+        account_guid
+        quantity 
+        value 
+      }
+    }
+  }
+`
 
 const options = {
   forceFitColumns: true,
@@ -60,7 +99,13 @@ export default {
       type: String,
       required: false,
       default: "USD"
-    }
+    },
+    type_map: {
+      type: Object,
+      default: function() {
+        return {}
+      }
+    },
   },
   data: () => ({
     transactionsTable: [],
@@ -68,6 +113,50 @@ export default {
     widths: 20,
     options: options
   }),
+  methods: {
+    editHandler(e,p) {
+      console.log("e",e)
+      console.log("p",p)
+      let splits = p.item.splits.map(c => {
+        return {
+          guid: c.guid,
+          account_guid: c.account_guid,
+          value: c.value,
+          quantity: c.quantity,
+          // memo: c.memo,
+          // action: c.action,
+          // reconcile_state: c.reconcile_state,
+          // reconcile_date: c.reconcile_date,
+        }
+      })
+      this.$apollo.mutate({
+        mutation: TRANSACTION_UPDATE,
+        variables: {
+          guid: p.item.guid,
+          description: p.item.description,
+          post_date: p.item.post_date,
+          splits: splits,
+        },
+        update: (store, { data: {updateTransaction}}) => {
+            if (updateTransaction) {
+              console.log("UPDATE TX", updateTransaction)
+              const txt = store.readQuery({
+                query: TXTABLE,
+              })
+            }
+          },
+          // optimisticResponse: {
+          //   __typename: 'Mutation',
+          //   update_todos: {
+          //     __typename: 'todos',
+          //     id: todo.id,
+          //     is_completed: !todo.is_completed,
+          //     affected_rows: 1,
+          //   }
+          // }
+      })
+    }
+  },
   computed: {
     columnOptions() {
       console.log("editor: ",Editors)
@@ -79,8 +168,11 @@ export default {
         },
         post_date: {
           name: "Date",
-          width: 100,
-          order: 1
+          width: 80,
+          order: 1,
+          formatter: function(row,cell,value) {
+            return moment(value).format('L')
+          }
         },
         description: {
           name: "Description",
@@ -94,24 +186,24 @@ export default {
           cssClass: 'text-left',
           width: 300,
           formatter: function(row, cell, value, columnDef, dataContext) {
-            return self.flataccounts[value];
+            return value ? self.flataccounts[value] : '--Split Transaction--'
           },
           order: 3,
         },
         debit_value: {
           name: "Debit",
-          minWidth: 100,
+          width: 80,
           order: 4,
           // editor: Editors.Number
         },
         credit_value: {
           name: "Credit",
-          minWidth: 100,
+          width: 80,
           order: 5, 
         },
         balance: {
           name: "Balance",
-          minWidth: 100,
+          width: 100,
           order: 6,
         },
         splits: {
@@ -146,40 +238,77 @@ export default {
   },
   mounted() {},
   apollo: {
-    transactionsTable: {
+    // transactionsTable: {
+    //   query: TXTABLE,
+    //   variables() {
+    //     return {
+    //       guid: this.account_guid
+    //     };
+    //   },
+    //   update(data) {
+    //     console.log("updating: ", data);
+    //     return data.transactionsTable;
+    //   },
+    //   result(queryResult) {
+    //     console.log("result");
+    //     queryResult.data.transactionsTable.reduce((a, c, i) => {
+    //       // if (c.account_guid) {
+    //       //   try {
+    //       //     c.account_guid = this.flataccounts[c.account_guid].fullname;
+    //       //   } catch {}
+    //       // }
+    //       c["balance"] = a + c.debit_quantity - c.credit_quantity;
+    //       a = c.balance;
+    //       try {
+    //         c.splits = JSON.parse(c.splits);
+    //       } catch {}
+    //       return a;
+    //     }, 0);
+    //     return queryResult;
+    //     // console.log(queryResult)
+    //   },
+    //   // skip() {
+    //   //   return Boolean(this.account_guid)
+    //   // },
+    //   error(error) {
+    //     this.error.push(JSON.stringify(error.message));
+    //   }
+    // },
+    accounts: {
       query: TXTABLE,
       variables() {
         return {
           guid: this.account_guid
-        };
+        }
       },
       update(data) {
-        console.log("updating: ", data);
-        return data.transactionsTable;
+        return data.accounts
       },
       result(queryResult) {
-        console.log("result");
-        queryResult.data.transactionsTable.reduce((a, c, i) => {
-          // if (c.account_guid) {
-          //   try {
-          //     c.account_guid = this.flataccounts[c.account_guid].fullname;
-          //   } catch {}
-          // }
-          c["balance"] = a + c.debit_quantity - c.credit_quantity;
+        // console.log("result this", this)
+        const self = this
+        console.log("TXTABLE",queryResult)
+        queryResult.data.accounts[0].transactions.reduce((a,c) => {
+          let mainsplit = c.splits.reduce((a,cur) => {
+            if (cur.account_type != "TRADING" && 
+                cur.account_guid != self.account_guid
+                ) {
+                  a.split = cur
+                  a.i = a.i + 1
+                  return a
+            }
+            return a
+          },{i:0})
+          console.log('mainsplit', mainsplit, mainsplit.i)
+          let accountSplit = c.splits.find(c => c.account_guid = self.account_guid)
+          c.debit_value = accountSplit.value > 0 ? accountSplit.value : null
+          c.credit_value = accountSplit.value < 0 ? -accountSplit.value : null
+          c.account_guid = mainsplit.i == 1 ? mainsplit.split.account_guid : null
+          c["balance"] = a + c.debit_value - c.credit_value;
           a = c.balance;
-          try {
-            c.splits = JSON.parse(c.splits);
-          } catch {}
           return a;
-        }, 0);
-        return queryResult;
-        // console.log(queryResult)
-      },
-      // skip() {
-      //   return Boolean(this.account_guid)
-      // },
-      error(error) {
-        this.error.push(JSON.stringify(error.message));
+        },0)
+        return queryResult
       }
     }
   }

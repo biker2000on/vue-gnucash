@@ -8,7 +8,7 @@
         </v-list-tile-action>
         <v-list-tile-title>Home</v-list-tile-title>
       </v-list-tile>
-      <v-list-group prepend-icon="settings" value="true">
+      <v-list-group prepend-icon="settings" :value="false">
         <template v-slot:activator>
           <v-list-tile>
             <v-list-tile-title>Settings</v-list-tile-title>
@@ -52,7 +52,7 @@
         <v-list-tile-title>Reports</v-list-tile-title>
       </v-list-tile>
 
-      <v-list-group prepend-icon="account_balance" value="true">
+      <v-list-group prepend-icon="account_balance" :value="true">
         <template v-slot:activator>
           <v-list-tile>
             <v-list-tile-title>Accounts</v-list-tile-title>

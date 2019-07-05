@@ -45,6 +45,7 @@
           :account_guid="tab" 
           :flataccounts="accountNameMap"
           :commodity="active_commodity"
+          :type_map="flattenedAccountsMap"
           />
         </v-tab-item>
       </v-tabs-items>
@@ -59,15 +60,36 @@ import Navigation from './components/Navigation'
 import gql from 'graphql-tag'
 import {flattenToObject} from './utilities/flattenTree'
 import AccountTreeSlimgrid from './components/AccountTreeSlimgrid'
+import { makeTree } from './utilities/makeTree'
 
 const ACCOUNT_TREE = gql`
-  query {
+  query getAccountTree {
     accountTree
   }
 `
 
+const ACCOUNTS = gql`
+  query getAccounts {
+    accounts {
+      account_type
+      code 
+      commodity_guid
+      commodity_scu
+      depth
+      description
+      fullname
+      guid
+      parent_guid
+      hidden
+      name
+      non_std_scu
+      placeholder
+    }
+  }
+`
+
 const COMMODITIES = gql`
-  query {
+  query getCommodities {
     commodities {
       guid
       mnemonic
@@ -124,6 +146,13 @@ export default {
     }
   },
   computed: {
+    accountTree() {
+      if (this.accounts) {
+        const tree = makeTree(this.accounts, "guid", "parent_guid", 'children', 'fd4dd79886327b270a0fa8efe6a07972')
+        return tree
+      }
+      return []
+    },
     flattenedAccountsMap() {
       return flattenToObject(
         this.accountTree,
@@ -135,6 +164,7 @@ export default {
         node => node.guid
       )
     },
+
     accountNameMap() {
       return flattenToObject(
         this.accountTree,
@@ -158,8 +188,8 @@ export default {
 
   },
   apollo: {
-    accountTree: {
-      query: ACCOUNT_TREE,
+    accounts: {
+      query: ACCOUNTS,
       error(error) {
         this.error.push(JSON.stringify(error.message))
       }
