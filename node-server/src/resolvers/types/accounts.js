@@ -19,9 +19,9 @@ const accountResolver = {
     async transactions (account, args, {knex}) {
       const txs = await knex('splits').where('splits.account_guid', account.guid)
                           .join('transactions as t','splits.tx_guid','t.guid')
-                          .leftJoin('slots as s', 's.obj_guid', 't.guid')
-                          .where('s.name',"notes")
-                          .select('t.*','s.string_val as note')
+                          .join('slots as s', 's.obj_guid', 't.guid')
+                          .groupBy('t.guid')
+                          .select('t.*',knex.raw('max(s.string_val) as note'))
       return txs
     },
     async transactionSplits (account, args, {knex}) {
