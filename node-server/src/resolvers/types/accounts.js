@@ -21,6 +21,7 @@ const accountResolver = {
                           .join('transactions as t','splits.tx_guid','t.guid')
                           .join('slots as s', 's.obj_guid', 't.guid')
                           .groupBy('t.guid')
+                          .orderBy('t.post_date')
                           .select('t.*',knex.raw('max(s.string_val) as note'))
       return txs
     },

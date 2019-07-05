@@ -6,10 +6,14 @@ const Account = gql`
     name: String!
     account_type: String!
     balance: Balance
+    code: String
     commodity_guid: String!
+    commodity_scu: Int!
     commodity: Commodity!
     children: [Account]
     parent: Account
+    parent_guid: ID!
+    non_std_scu: Int
     fullname: String
     description: String!
     hidden: Boolean

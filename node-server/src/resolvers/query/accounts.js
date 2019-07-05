@@ -1,7 +1,7 @@
 const accountsResolver = {
   Query: {
     async accounts (root, args, {knex}) {
-      return knex.withRecursive('ancestors', (qb) => {
+      const accounts = await knex.withRecursive('ancestors', (qb) => {
         qb.select('accounts.*', knex.raw('0 as depth'), knex.raw('accounts.name as fullname'))
         .from('accounts')
         .where('parent_guid', 'fd4dd79886327b270a0fa8efe6a07972')
@@ -11,6 +11,8 @@ const accountsResolver = {
           .join('ancestors','ancestors.guid','accounts.parent_guid')
         })
       }).select().from('ancestors').orderBy('fullname')
+      if (args.guid) return [accounts.find(a => a.guid == args.guid)]
+      return accounts
     },
   }
 }
