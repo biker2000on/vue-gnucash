@@ -11,6 +11,7 @@
     leaveSpaceForNewRows
     :downloadable="false"
     @cell-change="editHandler"
+    ref="slimgridComp"
   />
 </template>
 

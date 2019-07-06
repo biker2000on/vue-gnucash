@@ -28,6 +28,8 @@
             v-for="i in tabs"
             :key="i"
             :href="`#tab-${i}`"
+            @change="refreshTab"
+
           >
             {{ i == 'accountTree1' ? 'Accounts' : '' }}{{ flattenedAccountsMap[i] ? flattenedAccountsMap[i].name + ' ' : '' }} <span @click="closeTab(i)" class="close error">x</span>
           </v-tab>
@@ -39,13 +41,14 @@
       <!-- <v-container fill-height> -->
       <v-tabs-items v-model="active_tab">
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <account-tree-slimgrid v-if="tab == 'accountTree1' && accountTree" :accountTree="accountTree" />
+          <account-tree-slimgrid v-if="tab == 'accountTree1' && accountTree" :accountTree="accountTree" ref="grid" />
           <account-slimgrid 
-          v-if="active_account_guid  && accountNameMap && tab != 'accountTree1'" 
+          v-if="active_account_guid  && accountNameMap && tab != 'accountTree1'"  
           :account_guid="tab" 
           :flataccounts="accountNameMap"
           :commodity="active_commodity"
           :type_map="flattenedAccountsMap"
+          ref="grid"
           />
         </v-tab-item>
       </v-tabs-items>
@@ -143,6 +146,9 @@ export default {
     },
     toggleNav(e) {
       this.drawer = !this.drawer
+    },
+    refreshTab(prop) {
+      this.$root.$emit('refresh-grid')
     }
   },
   computed: {

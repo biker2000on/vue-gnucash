@@ -11,6 +11,7 @@
     :downloadable="false"
     treeFilter
     :showHiddenRows="showHidden"
+    ref="slimgridComp"
   />
 </template>
 

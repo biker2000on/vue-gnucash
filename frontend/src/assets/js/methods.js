@@ -537,10 +537,11 @@ export default {
    * Performs resizing of the grid to match its container.
    */
   handleResize() {
-    if (!this.slickGrid) return;
-
-    this.slickGrid.invalidate();
-    this.slickGrid.resizeCanvas();
+    if (!this.slickGrid) {
+      return
+    };
+    this.slickGrid.invalidate()
+    this.slickGrid.resizeCanvas()
   },
 
   treeViewCollapseBehaivor() {
@@ -561,5 +562,8 @@ export default {
         }
       });
     }
+  },
+  delayedResize() {
+    setTimeout(this.handleResize,1500)
   }
 };

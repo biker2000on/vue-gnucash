@@ -146,6 +146,7 @@ export default {
   },
   mounted() {
     window.addEventListener("resize", this.handleResize);
+    this.$root.$on('refresh-grid', this.delayedResize)
     this.init();
   },
   beforeDestroy() {
