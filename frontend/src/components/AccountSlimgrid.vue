@@ -6,7 +6,6 @@
     :column-options="columnOptions"
     :height="550"
     :selection-model="selectionModel"
-    :custom-plugins="customPlugins"
     forceFitColumns
     fullWidthRows
     editable
