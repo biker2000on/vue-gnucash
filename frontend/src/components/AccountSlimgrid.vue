@@ -24,7 +24,6 @@ import SlimGrid from "vue-slimgrid";
 import getSymbolFromCurrency from "currency-symbol-map";
 import moment from "moment";
 import { Editors, Plugins, Row } from "slickgrid-es6";
-import {RowDetailView} from "../assets/js/plugins/slick.rowdetailview";
 
 const TXTABLE = gql`
   query getAccounts($guid: String) {
@@ -164,53 +163,6 @@ export default {
     }
   },
   computed: {
-    customPlugins: function() {
-      const self = this;
-      return {
-        RowDetailView: {
-          register: true,
-          plugin: new RowDetailView({
-            cssClass: "detailView-toggle",
-            preTemplate: function(itemDetail) {
-              // basic template
-              return Vue.component('loading', VProgressCircular)
-            },
-            postTemplate: function(itemDetail) {
-              // add Vue component here
-              return Vue.component('detail', {
-                render: function(createElement) {
-                  return createElement(SlimGrid, {
-                    props: {
-                      data: itemDetail.splits
-                    }
-                  })
-                }
-              })
-            },
-            useRowClick: true,
-            // how many grid rows do we want to use for the detail panel
-            // also note that the detail view adds an extra 1 row for padding purposes
-            // example, if you choosed 6 panelRows, the display will in fact use 5 rows
-            panelRows: 6,
-            // make only every 2nd row an expandable row,
-            // by using the override function to provide custom logic of which row is expandable
-            // you can override it here in the options or externally by calling the method on the plugin instance
-          }),
-          // events: {
-          //   onBeforeRowDetailToggle: {
-          //     on(e, args) {
-          //       self.$emit("before-row-detail-toggle", e, args);
-          //     }
-          //   },
-          //   onAfterRowDetailToggle: {
-          //     on(e, args) {
-          //       self.$emit("after-row-detail-toggle", e, args);
-          //     }
-          //   }
-          // }
-        }
-      };
-    },
     columnOptions() {
       console.log("editor: ", Editors);
       const self = this;
@@ -377,7 +329,6 @@ export default {
 
 <style>
 @import "../../node_modules/vue-slimgrid/dist/slimgrid.css";
-@import "../assets/scss/rowdetailview.css";
 </style>
 
 
