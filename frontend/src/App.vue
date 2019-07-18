@@ -28,8 +28,6 @@
             v-for="i in tabs"
             :key="i"
             :href="`#tab-${i}`"
-            @change="refreshTab"
-
           >
             {{ i == 'accountTree1' ? 'Accounts' : '' }}{{ flattenedAccountsMap[i] ? flattenedAccountsMap[i].name + ' ' : '' }} <span @click="closeTab(i)" class="close error">x</span>
           </v-tab>
@@ -41,7 +39,7 @@
       <!-- <v-container fill-height> -->
       <v-tabs-items v-model="active_tab">
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <account-tree-slimgrid v-if="tab == 'accountTree1' && accountTree" :accountTree="accountTree" ref="grid" />
+          <account-tree-tabulator v-if="tab == 'accountTree1' && accountTree" :accountTree="accountTree" ref="grid" />
           <account-tabulator 
           v-if="active_account_guid  && accountNameMap && tab != 'accountTree1'"  
           :account_guid="tab" 
@@ -64,6 +62,7 @@ import Navigation from './components/Navigation'
 import gql from 'graphql-tag'
 import {flattenToObject} from './utilities/flattenTree'
 import AccountTreeSlimgrid from './components/AccountTreeSlimgrid'
+import AccountTreeTabulator from './components/AccountTreeTabulator'
 import { makeTree } from './utilities/makeTree'
 
 const ACCOUNT_TREE = gql`
@@ -106,8 +105,9 @@ export default {
   components: {
     Navigation,
     AccountSlimgrid,
-    AccountTreeSlimgrid,
+    // AccountTreeSlimgrid,
     AccountTabulator,
+    AccountTreeTabulator,
   },
   data () {
     return {
@@ -149,9 +149,9 @@ export default {
     toggleNav(e) {
       this.drawer = !this.drawer
     },
-    refreshTab(prop) {
-      this.$root.$emit('refresh-grid')
-    }
+    // refreshTab(prop) {
+    //   this.$root.$emit('refresh-grid')
+    // }
   },
   computed: {
     accountTree() {

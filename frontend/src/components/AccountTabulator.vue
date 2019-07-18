@@ -1,7 +1,7 @@
 <template>
-  <vue-tabulator 
+  <vue-tabulator
     v-if="!$apollo.queries.accounts.loading"
-    v-model="accounts[0].transactions"
+    v-model="transactionsTable"
     :options="options"
     ref="tabulator"
   />
@@ -9,8 +9,10 @@
 
 <script>
 import gql from "graphql-tag";
-import getSymbolFromCurrency from "currency-symbol-map";
 import moment from "moment";
+import Dinero from "dinero.js";
+
+Dinero.globalLocale = "en-US";
 
 const TXTABLE = gql`
   query getAccounts($guid: String) {
@@ -30,8 +32,10 @@ const TXTABLE = gql`
           action
           reconcile_state
           reconcile_date
-          value
-          quantity
+          value_num
+          value_denom
+          quantity_num
+          quantity_denom
         }
       }
     }
@@ -92,10 +96,8 @@ export default {
     }
   },
   data: () => ({
-    transactionsTable: [],
     error: [],
-    widths: 20,
-    
+    widths: 20
   }),
   methods: {
     editHandler(e, p) {
@@ -142,63 +144,149 @@ export default {
     }
   },
   computed: {
-    options() {
-      const vm = this
+    transactionsTable() {
+      const vm = this;
+
+      // Dinero default
+      Dinero.defaultAmount = 0;
+      Dinero.defaultCurrency = vm.commodity;
+      Dinero.defaultPrecision = 2;
+
+      let txs = vm.accounts[0].transactions.map((c, index, arr) => {
+        let accountSplit = c.splits.find(
+          g => (g.account_guid == vm.account_guid)
+        );
+        let mainsplit = c.splits.reduce(
+          (a, cur) => {
+            if (
+              vm.type_map[cur.account_guid].account_type != "TRADING" &&
+              cur.account_guid != vm.account_guid
+            ) {
+              a.split = cur;
+              a.i = a.i + 1;
+              return a;
+            }
+            return a;
+          },
+          { i: 0 }
+        );
+        c.debit_value =
+          accountSplit.value_num > 0
+            ? Dinero({
+                amount: accountSplit.quantity_num,
+                precision: Math.log10(accountSplit.value_denom),
+                currency: vm.commodity
+              })
+            : Dinero();
+        c.credit_value =
+          accountSplit.value_num < 0
+            ? Dinero({
+                amount: -accountSplit.quantity_num,
+                precision: Math.log10(accountSplit.value_denom),
+                currency: vm.commodity
+              })
+            : Dinero();
+        c.account_guid = mainsplit.i == 1 ? mainsplit.split.account_guid : null;
+        c["balance"] = // Dinero()
+          index > 0
+            ? arr[index - 1].balance.add(c.debit_value).subtract(c.credit_value)
+            : c.debit_value.subtract(c.credit_value);
+        return c;
+      });
+      return txs;
+    },
+    flataccountsNull() {
+      const vm = this;
       return {
-        columns: vm.columns
-      }
+        ...vm.flataccounts,
+        null: "--Split Transaction--"
+      };
+    },
+    options() {
+      const vm = this;
+      return {
+        columns: vm.columns,
+        height: 550
+      };
     },
     columns() {
-      const self = this
+      const vm = this;
       return [
         {
           title: "Date",
           field: "post_date",
-          sorter: 'string',
+          sorter: "string",
           width: 100,
-          align: 'left'
+          align: "left",
+          editor: "input",
+          formatter: function(cell, formatterParams, onRendered) {
+            const date = moment(cell.getValue());
+            return moment(cell.getValue()).format("L");
+          },
+          formatterParams: {
+            outputFormat: "MM/DD/YYYY"
+          }
         },
         {
           title: "Description",
-          field: 'description',
-          sorter: 'string',
-          align: 'left'
+          field: "description",
+          sorter: "string",
+          align: "left",
+          editor: "input"
         },
         {
           title: "Account",
-          field: 'account_guid',
-          sorter: 'string',
+          field: "account_guid",
+          sorter: "string",
           width: 300,
-          align: 'left',
-          formatter: 'lookup',
-          formatterParams: self.flataccounts
+          align: "left",
+          formatter: "lookup",
+          formatterParams: vm.flataccountsNull,
+          editor: "autocomplete",
+          editorParams: {
+            showListOnEmpty: true, //show all values when the list is empty,
+            freetext: false, //allow the user to set the value of the cell to a free text entry
+            allowEmpty: false, //allow empty string values
+            values: vm.flataccounts //create list of values from all values contained in this column
+          }
         },
         {
           title: "Debit",
-          field: 'debit_value',
-          sorter: 'number',
+          field: "debit_value",
+          sorter: "number",
           width: 100,
-          align: 'right'
+          align: "right",
+          formatter: function(cell, formatterParams, onRendered) {
+            return cell.getValue().getAmount() != 0
+              ? cell.getValue().toFormat("$0,0.00")
+              : "";
+          }
         },
         {
           title: "Credit",
-          field: 'credit_value',
-          sorter: 'number',
+          field: "credit_value",
+          sorter: "number",
           width: 100,
-          align: 'right',
+          align: "right",
+          formatter: function(cell, formatterParams, onRendered) {
+            return cell.getValue().getAmount() != 0
+              ? cell.getValue().toFormat("$0,0.00")
+              : "";
+          }
         },
         {
-          title: 'Balance',
-          field: 'balance',
+          title: "Balance",
+          field: "balance",
           width: 100,
-          align: 'right'
-        },
-      ]
+          align: "right",
+          formatter: function(cell, formatterParams, onRendered) {
+            return cell.getValue().getAmount() != 0
+              ? cell.getValue().toFormat("$0,0.00")
+              : "";
+          }
+        }
+      ];
     },
-    symbol() {
-      const symbol = getSymbolFromCurrency(this.commodity);
-      return symbol ? symbol : this.commodity;
-    }
   },
   mounted() {},
   apollo: {
@@ -212,39 +300,65 @@ export default {
       update(data) {
         return data.accounts;
       },
-      result(queryResult) {
-        // console.log("result this", this)
-        const self = this;
-        console.log("TXTABLE", queryResult);
-        queryResult.data.accounts[0].transactions.reduce((a, c) => {
-          let mainsplit = c.splits.reduce(
-            (a, cur) => {
-              if (
-                cur.account_type != "TRADING" &&
-                cur.account_guid != self.account_guid
-              ) {
-                a.split = cur;
-                a.i = a.i + 1;
-                return a;
-              }
-              return a;
-            },
-            { i: 0 }
-          );
-          console.log("mainsplit", mainsplit, mainsplit.i);
-          let accountSplit = c.splits.find(
-            c => (c.account_guid = self.account_guid)
-          );
-          c.debit_value = accountSplit.value > 0 ? accountSplit.value : null;
-          c.credit_value = accountSplit.value < 0 ? -accountSplit.value : null;
-          c.account_guid =
-            mainsplit.i == 1 ? mainsplit.split.account_guid : null;
-          c["balance"] = a + c.debit_value - c.credit_value;
-          a = c.balance;
-          return a;
-        }, 0);
-        return queryResult;
-      }
+      // result(queryResult) {
+      //   // console.log("result this", this)
+      //   const vm = this;
+
+      //   // Dinero default
+      //   Dinero.defaultAmount = 0;
+      //   Dinero.defaultCurrency = vm.commodity;
+      //   Dinero.defaultPrecision = 2;
+
+      //   queryResult.data.accounts[0].transactions.reduce((a, c) => {
+      //     console.log("transaction", c.description, c.post_date);
+      //     let accountSplit = c.splits.find(
+      //       c => (c.account_guid = vm.account_guid)
+      //     );
+      //     let mainsplit = c.splits.reduce(
+      //       (a, cur) => {
+      //         if (
+      //           vm.type_map[cur.account_guid].account_type != "TRADING" &&
+      //           cur.account_guid != vm.account_guid
+      //         ) {
+      //           console.log(
+      //             "inside map",
+      //             cur.account_guid == vm.account_guid,
+      //             cur.value_num > 0 ? true : false
+      //           );
+      //           a.split = cur;
+      //           a.i = a.i + 1;
+      //           return a;
+      //         }
+      //         return a;
+      //       },
+      //       { i: 0 }
+      //     );
+      //     console.log("mainsplit", mainsplit, mainsplit.i);
+      //     console.log("main account split", accountSplit);
+      //     c.debit_value =
+      //       accountSplit.value_num > 0
+      //         ? Dinero({
+      //             amount: accountSplit.value_num,
+      //             precision: Math.log10(accountSplit.value_denom),
+      //             currency: vm.commodity
+      //           })
+      //         : Dinero();
+      //     c.credit_value =
+      //       accountSplit.value_num < 0
+      //         ? Dinero({
+      //             amount: -accountSplit.value_num,
+      //             precision: Math.log10(accountSplit.value_denom),
+      //             currency: vm.commodity
+      //           })
+      //         : Dinero();
+      //     c.account_guid =
+      //       mainsplit.i == 1 ? mainsplit.split.account_guid : null;
+      //     c["balance"] = a.add(c.debit_value).subtract(c.credit_value);
+      //     a = c.balance;
+      //     return a;
+      //   }, Dinero());
+      //   return queryResult;
+      // }
     }
   }
 };

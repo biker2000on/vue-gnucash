@@ -1,33 +1,21 @@
 <template>
-  <slim-grid
-    v-if="flattenedAccounts"
-    pk="guid"
-    :data="flattenedAccounts"
-    :column-options="columnOptions"
-    :height="550"
-    :explicit-columns="['name','description','fullname']"
-    forceFitColumns
-    fullWidthRows
-    :downloadable="false"
-    treeFilter
-    :showHiddenRows="showHidden"
-    ref="slimgridComp"
+  <vue-tabulator
+    v-if="accountTree"
+    v-model="accountTree"
+    :options="options"
+    ref="tabulator"
   />
 </template>
 
 <script>
-import SlimGrid from "./SlimGrid";
-import VueTabulator from 'vue-tabulator'
 import { flattenToArray } from "../utilities/flattenTree";
 
 export default {
-  components: {
-    VueTabulator
-  },
   props: {
     accountTree: {
       type: Array,
-      required: true
+      required: true,
+      default: null,
     }
   },
   data: () => ({
@@ -39,21 +27,33 @@ export default {
     }
   },
   computed: {
-    columnOptions() {
+    options() {
+      const vm = this
       return {
-        "*": {
-          cssClass: 'text-left'
-          // headerFilter: false,
+        height: 550,
+        dataTree: true,
+        dataTreeChildField: 'children',
+        dataTreeBranchElement: false,
+        dataTreeChildIndent: 15,
+        dataTreeStartExpanded: [true,true,false], // start with first 2 levels expanded
+        columns: vm.columns
+      }
+    },
+    columns() {
+      const vm = this
+      return [
+        {
+          title: 'Name',
+          field: 'name',
+          sorter: "string",
+          align: 'left'
         },
-        name: {
-          name: "Name",
-          cssClass: "text-left",
-        },
-        description: {
-          name: "Description",
-          cssClass: "text-left"
+        {
+          title: 'Description',
+          field: 'description',
+          align: 'left',
         }
-      };
+      ]
     },
     flattenedAccounts() {
       return flattenToArray(
@@ -69,3 +69,8 @@ export default {
   }
 };
 </script>
+
+<style lang="scss">
+@import "../../node_modules/vue-tabulator/dist/scss/tabulator.scss";
+</style>
+
