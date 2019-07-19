@@ -12,6 +12,7 @@ const budgetResolver = {
       const budgets = await knex('budgets')
       .join('recurrences','budgets.guid','recurrences.obj_guid')
       .select()
+      .orderBy('name')
       return budgets
     }
   }

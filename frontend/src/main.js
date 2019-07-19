@@ -1,8 +1,9 @@
 import Vue from 'vue'
-import './plugins/vuetify'
+import './plugins'
 import App from './App.vue'
 import axios from 'axios'
 import directives from "./directives/directives";
+import { router } from './router/router'
 
 import VueApollo from 'vue-apollo'
 import ApolloClient from "apollo-client";
@@ -39,5 +40,6 @@ Vue.config.productionTip = false
 
 new Vue({
   apolloProvider,
+  router,
   render: h => h(App),
 }).$mount('#app')

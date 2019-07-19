@@ -39,12 +39,16 @@
           <v-list-tile-title>Report</v-list-tile-title>
         </v-list-tile>
       </v-list-group>
-      <v-list-tile @click.stop>
-        <v-list-tile-action>
-          <v-icon>attach_money</v-icon>
-        </v-list-tile-action>
+      <v-list-group prepend-icon="attach_money" @click.stop :value="false">
+        <template v-slot:activator>
+          <v-list-tile>
         <v-list-tile-title>Budget</v-list-tile-title>
-      </v-list-tile>
+        </v-list-tile>
+        </template>
+        <v-list-tile v-for="budget in budgets" :key="budget.guid" @click="$emit('update-budget',budget.guid)">
+          <v-list-tile-title>{{ budget.name }}</v-list-tile-title>
+        </v-list-tile>
+      </v-list-group>
       <v-list-tile @click.stop>
         <v-list-tile-action>
           <v-icon>timeline</v-icon>
@@ -115,6 +119,10 @@ export default {
       type: Boolean,
       required: false,
       default: null
+    },
+    budgets: {
+      type: Array,
+      required: false
     }
   },
   data() {

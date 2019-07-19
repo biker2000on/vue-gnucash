@@ -1,17 +1,18 @@
 <template>
   <v-app>
-    <Navigation :accountTree="accountTree" @update-account="update_active($event)" :drawer.sync="drawer" @home-click="goHome($event)" />
+    <Navigation
+      :accountTree="accountTree"
+      :budgets="budgets"
+      @update-account="update_active($event)"
+      @update-budget="update_budget($event)"
+      @home-click="goHome($event)"
+      :drawer.sync="drawer"
+    />
     <v-toolbar fixed app dark color="primary">
       <v-toolbar-side-icon @click.stop="toggleNav($event)"></v-toolbar-side-icon>
-      <v-toolbar-title class="headline text-uppercase">
-        Gnucash Vue GraphQL
-      </v-toolbar-title>
+      <v-toolbar-title class="headline text-uppercase">Gnucash Vue GraphQL</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn
-        flat
-        href="https://gnucash.org"
-        target="_blank"
-      >
+      <v-btn flat href="https://gnucash.org" target="_blank">
         <span class="mr-2">Gnucash</span>
       </v-btn>
 
@@ -24,12 +25,14 @@
           color="primary"
           dark
         >
-          <v-tab
-            v-for="i in tabs"
-            :key="i"
-            :href="`#tab-${i}`"
-          >
-            {{ i == 'accountTree1' ? 'Accounts' : '' }}{{ flattenedAccountsMap[i] ? flattenedAccountsMap[i].name + ' ' : '' }} <span @click="closeTab(i)" class="close error">x</span>
+          <v-tab v-for="i in tabs" :key="i" :href="`#tab-${i}`">
+            {{ i == 'accountTree1' ? 'Accounts' : 
+              flattenedAccountsMap[i] ? flattenedAccountsMap[i].name + ' ' :
+              budgetMap[i] ? budgetMap[i].name + ' ' : '' }}
+            <span
+              @click="closeTab(i)"
+              class="close error"
+            >x</span>
           </v-tab>
         </v-tabs>
       </template>
@@ -39,14 +42,23 @@
       <!-- <v-container fill-height> -->
       <v-tabs-items v-model="active_tab">
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <account-tree-tabulator v-if="tab == 'accountTree1' && accountTree" :accountTree="accountTree" ref="grid" />
-          <account-tabulator 
-          v-if="active_account_guid  && accountNameMap && tab != 'accountTree1'"  
-          :account_guid="tab" 
-          :flataccounts="accountNameMap"
-          :commodity="active_commodity"
-          :type_map="flattenedAccountsMap"
-          ref="grid"
+          <account-tree-tabulator
+            v-if="tab == 'accountTree1' && accountTree"
+            :accountTree="accountTree"
+            ref="grid"
+          />
+          <account-tabulator
+            v-if="active_account_guid  && accountNameMap && tab != 'accountTree1'"
+            :account_guid="tab"
+            :flataccounts="accountNameMap"
+            :commodity="active_commodity"
+            :type_map="flattenedAccountsMap"
+            ref="grid"
+          />
+          <budget 
+            v-if="budgetMap[tab] && accountTree" 
+            :accountTree="accountTree" 
+            ref="grid" 
           />
         </v-tab-item>
       </v-tabs-items>
@@ -56,99 +68,76 @@
 </template>
 
 <script>
-import AccountSlimgrid from './components/AccountSlimgrid.vue'
-import AccountTabulator from './components/AccountTabulator'
-import Navigation from './components/Navigation'
-import gql from 'graphql-tag'
-import {flattenToObject} from './utilities/flattenTree'
-import AccountTreeSlimgrid from './components/AccountTreeSlimgrid'
-import AccountTreeTabulator from './components/AccountTreeTabulator'
-import { makeTree } from './utilities/makeTree'
-
-const ACCOUNT_TREE = gql`
-  query getAccountTree {
-    accountTree
-  }
-`
-
-const ACCOUNTS = gql`
-  query getAccounts {
-    accounts {
-      account_type
-      code 
-      commodity_guid
-      commodity_scu
-      depth
-      description
-      fullname
-      guid
-      parent_guid
-      hidden
-      name
-      non_std_scu
-      placeholder
-    }
-  }
-`
-
-const COMMODITIES = gql`
-  query getCommodities {
-    commodities {
-      guid
-      mnemonic
-    }
-  }
-`
+import AccountSlimgrid from "./components/AccountSlimgrid.vue";
+import AccountTabulator from "./components/AccountTabulator";
+import Navigation from "./components/Navigation";
+import { flattenToObject } from "./utilities/flattenTree";
+import AccountTreeSlimgrid from "./components/AccountTreeSlimgrid";
+import AccountTreeTabulator from "./components/AccountTreeTabulator";
+import { makeTree } from "./utilities/makeTree";
+import { ACCOUNTS, BUDGETS, COMMODITIES } from "./assets/js/root-queries";
+import Budget from "./components/Budget";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     Navigation,
     AccountSlimgrid,
     // AccountTreeSlimgrid,
     AccountTabulator,
     AccountTreeTabulator,
+    Budget
   },
-  data () {
+  data() {
     return {
       drawer: null,
       search: null,
       active_account_guid: null,
       active_account: null,
-      tabs: ['accountTree1'],
+      tabs: ["accountTree1"],
       active_tab: null,
       splits: {},
-      separator: ':',
-      error: [],
-    }
+      separator: ":",
+      error: []
+    };
   },
   methods: {
     goHome(e) {
-      if (!this.tabs.includes('accountTree1')) {
-        this.tabs.unshift('accountTree1')
+      if (!this.tabs.includes("accountTree1")) {
+        this.tabs.unshift("accountTree1");
       }
-      this.active_tab = 'tab-accountTree1'
+      this.active_tab = "tab-accountTree1";
     },
     update_active(e) {
       if (e[0]) {
-        const {children, ...account} = e[0] 
-        this.active_account = account
-        this.active_account_guid = e[0].guid
-        if (this.tabs.includes(undefined)) {this.tabs.pop(this.tabs.indexOf(undefined))}
+        const { children, ...account } = e[0];
+        this.active_account = account;
+        this.active_account_guid = e[0].guid;
+        if (this.tabs.includes(undefined)) {
+          this.tabs.pop(this.tabs.indexOf(undefined));
+        }
         if (this.tabs.includes(this.active_account_guid)) {
-          this.active_tab = e[0].guid
+          this.active_tab = e[0].guid;
         } else {
-          this.tabs.push(e[0].guid)
-          this.active_tab = 'tab-' + e[0].guid
+          this.tabs.push(e[0].guid);
+          this.active_tab = "tab-" + e[0].guid;
         }
       }
-    }, 
+    },
+    update_budget(guid) {
+      if (!this.tabs.includes(guid)) {
+        this.tabs.push(guid)
+      }
+      this.active_tab = 'tab-budget-' + guid
+    },
     closeTab(key) {
-      if (this.tabs.includes(key)) {this.tabs.splice(this.tabs.indexOf(key),1)}
+      if (this.tabs.includes(key)) {
+        this.tabs.splice(this.tabs.indexOf(key), 1);
+      }
     },
     toggleNav(e) {
-      this.drawer = !this.drawer
-    },
+      this.drawer = !this.drawer;
+    }
     // refreshTab(prop) {
     //   this.$root.$emit('refresh-grid')
     // }
@@ -156,67 +145,83 @@ export default {
   computed: {
     accountTree() {
       if (this.accounts) {
-        const tree = makeTree(this.accounts, "guid", "parent_guid", 'children', 'fd4dd79886327b270a0fa8efe6a07972')
-        return tree
+        const tree = makeTree(
+          this.accounts,
+          "guid",
+          "parent_guid",
+          "children",
+          "fd4dd79886327b270a0fa8efe6a07972"
+        );
+        return tree;
       }
-      return []
+      return [];
     },
     flattenedAccountsMap() {
       return flattenToObject(
         this.accountTree,
         node => node.children,
         node => {
-          let {children, guid, ...flat} = node
-          return flat
+          let { children, guid, ...flat } = node;
+          return flat;
         },
         node => node.guid
-      )
+      );
     },
-
+    budgetMap() {
+      let budgetMap = {}
+      this.budgets.forEach(c => {
+        budgetMap[c.guid] = c
+      });
+      return budgetMap
+    },
     accountNameMap() {
       return flattenToObject(
         this.accountTree,
         node => node.children,
         node => node.fullname,
         node => node.guid
-      )
+      );
     },
     commoditityMap() {
-      let map = {}
+      let map = {};
       this.commodities.map(c => {
-        return map[c.guid] = c.mnemonic
-      })
-      return map
+        return (map[c.guid] = c.mnemonic);
+      });
+      return map;
     },
     active_commodity() {
-      return this.commoditityMap[this.active_account.commodity_guid]
+      return this.commoditityMap[this.active_account.commodity_guid];
     }
   },
-  created() {
-
-  },
+  created() {},
   apollo: {
     accounts: {
       query: ACCOUNTS,
       error(error) {
-        this.error.push(JSON.stringify(error.message))
+        this.error.push(JSON.stringify(error.message));
       }
     },
     commodities: {
       query: COMMODITIES,
       error(error) {
-        this.error.push(JSON.stringify(error.message))
+        this.error.push(JSON.stringify(error.message));
+      }
+    },
+    budgets: {
+      query: BUDGETS,
+      error(error) {
+        this.error.push(JSON.stringify(error.message));
       }
     }
   }
-}
+};
 </script>
 
 <style lang="scss">
-  .close {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    margin-left: 5px;
-  }
+.close {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-left: 5px;
+}
 </style>
