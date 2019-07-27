@@ -29,6 +29,33 @@ const makeTree = function (arr, guid = "id", parentId = "parentId", children = "
   return tree;
 }
 
+const makeTreeFromObject = function (obj, parentId = "parent_guid", children = "children", root = null) {
+  let tree = [],
+    mappedArr = obj,
+    mappedElem;
+
+  for(let i in obj) {
+    mappedArr[i][children] = [];
+  }
+
+  for (let id in mappedArr) {
+    if (mappedArr.hasOwnProperty(id)) {
+      mappedElem = mappedArr[id];
+      console.log(mappedElem[parentId])
+      // If the element is not at the root level, add it to its parent array of children.
+      if (mappedElem[parentId] !== root) {
+        // console.log(mappedArr)
+        mappedArr[mappedElem[parentId]][children].push(mappedElem);
+      }
+      // If the element is at the root level, add it to first level elements array.
+      else {
+        tree.push(mappedElem);
+      }
+    }
+  }
+  return tree;
+}
+
 /* 
 This function assumes that the list is ordered with parents / higher level components first.
 doesn't currently work...
@@ -61,4 +88,5 @@ function list_to_tree(list, id = "id", parentId = "parentId", depth = "depth", r
 module.exports = {
   makeTree,
   list_to_tree,
+  makeTreeFromObject,
 }

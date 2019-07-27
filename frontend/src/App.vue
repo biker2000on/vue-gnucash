@@ -39,7 +39,6 @@
     </v-toolbar>
 
     <v-content>
-      <!-- <v-container fill-height> -->
       <v-tabs-items v-model="active_tab">
         <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
           <account-tree-tabulator
@@ -53,26 +52,26 @@
             :flataccounts="accountNameMap"
             :commodity="active_commodity"
             :type_map="flattenedAccountsMap"
+            :height="contentHeight"
             ref="grid"
           />
           <budget 
             v-if="budgetMap[tab] && accountTree" 
             :accountTree="accountTree" 
+            :budget_guid="tab"
+            :height="contentHeight"
             ref="grid" 
           />
         </v-tab-item>
       </v-tabs-items>
-      <!-- </v-container> -->
     </v-content>
   </v-app>
 </template>
 
 <script>
-import AccountSlimgrid from "./components/AccountSlimgrid.vue";
 import AccountTabulator from "./components/AccountTabulator";
 import Navigation from "./components/Navigation";
 import { flattenToObject } from "./utilities/flattenTree";
-import AccountTreeSlimgrid from "./components/AccountTreeSlimgrid";
 import AccountTreeTabulator from "./components/AccountTreeTabulator";
 import { makeTree } from "./utilities/makeTree";
 import { ACCOUNTS, BUDGETS, COMMODITIES } from "./assets/js/root-queries";
@@ -82,8 +81,6 @@ export default {
   name: "App",
   components: {
     Navigation,
-    AccountSlimgrid,
-    // AccountTreeSlimgrid,
     AccountTabulator,
     AccountTreeTabulator,
     Budget
@@ -133,10 +130,10 @@ export default {
       this.contentHeight = this.windowHeight - top - bottom
     },
     update_budget(guid) {
-      this.computeHeight()
       if (!this.tabs.includes(guid)) {
         this.tabs.push(guid)
       }
+      this.computeHeight()
       this.active_tab = 'tab-' + guid
     },
     closeTab(key) {
@@ -178,9 +175,11 @@ export default {
     },
     budgetMap() {
       let budgetMap = {}
-      this.budgets.forEach(c => {
-        budgetMap[c.guid] = c
-      });
+      if (this.budgets) {
+        this.budgets.forEach(c => {
+          budgetMap[c.guid] = c
+        });
+      }
       return budgetMap
     },
     accountNameMap() {

@@ -4,7 +4,6 @@
     v-model="transactionsTable"
     :options="options"
     ref="tabulator"
-    :style="styles"
   />
 </template>
 
