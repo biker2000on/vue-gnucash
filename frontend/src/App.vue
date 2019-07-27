@@ -98,7 +98,9 @@ export default {
       active_tab: null,
       splits: {},
       separator: ":",
-      error: []
+      error: [],
+      windowHeight: 300,
+      contentHeight: 550,
     };
   },
   methods: {
@@ -113,6 +115,7 @@ export default {
         const { children, ...account } = e[0];
         this.active_account = account;
         this.active_account_guid = e[0].guid;
+        this.computeHeight()
         if (this.tabs.includes(undefined)) {
           this.tabs.pop(this.tabs.indexOf(undefined));
         }
@@ -124,11 +127,17 @@ export default {
         }
       }
     },
+    computeHeight() {
+      const top = this.$vuetify.application.top
+      const bottom = this.$vuetify.application.bottom
+      this.contentHeight = this.windowHeight - top - bottom
+    },
     update_budget(guid) {
+      this.computeHeight()
       if (!this.tabs.includes(guid)) {
         this.tabs.push(guid)
       }
-      this.active_tab = 'tab-budget-' + guid
+      this.active_tab = 'tab-' + guid
     },
     closeTab(key) {
       if (this.tabs.includes(key)) {
@@ -193,7 +202,14 @@ export default {
       return this.commoditityMap[this.active_account.commodity_guid];
     }
   },
-  created() {},
+  mounted() {
+    this.$nextTick(() => {
+      window.addEventListener('resize', () => {
+        this.windowHeight = window.innerHeight
+      });
+      this.windowHeight = window.innerHeight
+    })
+  },
   apollo: {
     accounts: {
       query: ACCOUNTS,

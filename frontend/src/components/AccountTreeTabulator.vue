@@ -16,6 +16,10 @@ export default {
       type: Array,
       required: true,
       default: null,
+    },
+    height: {
+      type: Number,
+      default: 550,
     }
   },
   data: () => ({
@@ -30,7 +34,7 @@ export default {
     options() {
       const vm = this
       return {
-        height: 550,
+        height: this.height,
         dataTree: true,
         dataTreeChildField: 'children',
         dataTreeBranchElement: false,

@@ -4,6 +4,7 @@
     v-model="transactionsTable"
     :options="options"
     ref="tabulator"
+    :style="styles"
   />
 </template>
 
@@ -93,6 +94,10 @@ export default {
       default: function() {
         return {};
       }
+    },
+    height: {
+      type: Number,
+      default: 550
     }
   },
   data: () => ({
@@ -206,7 +211,7 @@ export default {
       const vm = this;
       return {
         columns: vm.columns,
-        height: 550
+        height: this.height
       };
     },
     columns() {

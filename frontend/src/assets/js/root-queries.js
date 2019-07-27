@@ -43,3 +43,24 @@ export const COMMODITIES = gql`
     }
   }
 `
+
+export const BUDGET = gql`
+  query getBudget($guid:ID!) {
+    budget(guid:$guid) {
+      name
+      description
+      num_periods
+      recurrence_mult
+      recurrence_period_type
+      recurrence_period_start
+      recurrence_weekend_adjust
+      budget_amounts {
+        id
+        period_num
+        amount_num
+        amount_denom
+        account_guid
+      }
+    }
+  }
+`
