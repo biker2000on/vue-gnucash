@@ -11,6 +11,12 @@
 import { flattenToArray, flattenToObject } from "../utilities/flattenTree";
 import { makeTreeFromObject } from '../utilities/makeTree'
 import { BUDGET } from '../assets/js/root-queries'
+import Dinero from 'dinero.js'
+
+Dinero.globalLocale = 'en-US'
+Dinero.defaultAmount = 0;
+Dinero.defaultCurrency = 'USD' // get from root account
+Dinero.defaultPrecision = 2;
 
 export default {
   props: {
@@ -53,7 +59,7 @@ export default {
       )
       if (this.budget) {
         this.budget.budget_amounts.map(c => {
-          map[c.account_guid][c.period_num] = {
+          map[c.account_guid]['bgt' + c.period_num] = {
             amount_num: c.amount_num,
             amount_denom: c.amount_denom,
             id: c.id,
@@ -66,21 +72,20 @@ export default {
         "children",
         "fd4dd79886327b270a0fa8efe6a07972"
       )
-      console.log('tree', tree)
+      // console.log('tree', tree)
       this.accountMap = tree
     },
   },
   computed: {
     options() {
-      const vm = this
       return {
         height: this.height,
         dataTree: true,
         dataTreeChildField: 'children',
         dataTreeBranchElement: false,
         dataTreeChildIndent: 15,
-        dataTreeStartExpanded: [true,true,false], // start with first 2 levels expanded
-        columns: vm.columns
+        dataTreeStartExpanded: [true,false], // start with first 1 levels expanded
+        columns: this.columns
       }
     },
     columns() {
@@ -89,14 +94,26 @@ export default {
       for (let i=0; i < this.budget.num_periods; i++) {
         periods.push({
           title: i + 1,
-          field: 'bdg' + i,
+          field: 'bgt' + i,
           sorter: 'number',
+          mutator: function (value, row, type, params, component) {
+            console.log('mutator value', value, row, type, params, component)
+            if (!value) return Dinero() // check for null
+            if (type == 'data' && Object.keys(value).includes('amount_num')) { // make Dinero
+              return Dinero({
+                  amount: value.amount_num,
+                  precision: Math.log10(value.amount_denom)
+                })
+            }
+            return value // already Dinero object
+            
+          },
           formatter: function(cell, formatterParams, onRendered) {
             const val = cell.getValue()
-            if (!val) {
+            if (val.isZero()) {
               return ""
-            }
-            return val.amount_num
+            } 
+            return val.toFormat("$0,0.00")
           },
         })
       }

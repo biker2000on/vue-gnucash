@@ -41,7 +41,6 @@ const makeTreeFromObject = function (obj, parentId = "parent_guid", children = "
   for (let id in mappedArr) {
     if (mappedArr.hasOwnProperty(id)) {
       mappedElem = mappedArr[id];
-      console.log(mappedElem[parentId])
       // If the element is not at the root level, add it to its parent array of children.
       if (mappedElem[parentId] !== root) {
         // console.log(mappedArr)
