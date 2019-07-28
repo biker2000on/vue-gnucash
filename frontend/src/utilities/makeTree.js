@@ -29,7 +29,8 @@ const makeTree = function (arr, guid = "id", parentId = "parentId", children = "
   return tree;
 }
 
-const makeTreeFromObject = function (obj, parentId = "parent_guid", children = "children", root = null) {
+// function specifically for building budget totals / subtotals
+const makeTreeFromObject = function (obj, parentId = "parent_guid", children = "children", root = null, num_periods=12) {
   let tree = [],
     mappedArr = obj,
     mappedElem;
@@ -45,6 +46,11 @@ const makeTreeFromObject = function (obj, parentId = "parent_guid", children = "
       if (mappedElem[parentId] !== root) {
         // console.log(mappedArr)
         mappedArr[mappedElem[parentId]][children].push(mappedElem);
+        for (let i = 0; i < num_periods; i++) {
+          mappedArr[mappedElem[parentId]]['bgt' + i].subtotal = mappedArr[mappedElem[parentId]]['bgt' + i].subtotal.add(
+            mappedElem['bgt' + i].amount.isZero() ? mappedElem['bgt' + i].subtotal : mappedElem['bgt' + i].amount
+          )
+        }
       }
       // If the element is at the root level, add it to first level elements array.
       else {

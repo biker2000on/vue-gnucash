@@ -64,3 +64,17 @@ export const BUDGET = gql`
     }
   }
 `
+
+export const BOOKS = gql`
+  query getBook {
+    books {
+      root_account_guid
+      root_account {
+        commodity_guid
+        commodity {
+          mnemonic
+        }
+      }
+    }
+  }
+`

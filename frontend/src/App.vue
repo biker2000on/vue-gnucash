@@ -74,7 +74,7 @@ import Navigation from "./components/Navigation";
 import { flattenToObject } from "./utilities/flattenTree";
 import AccountTreeTabulator from "./components/AccountTreeTabulator";
 import { makeTree } from "./utilities/makeTree";
-import { ACCOUNTS, BUDGETS, COMMODITIES } from "./assets/js/root-queries";
+import { ACCOUNTS, BUDGETS, COMMODITIES, BOOKS } from "./assets/js/root-queries";
 import Budget from "./components/Budget";
 
 export default {
@@ -98,6 +98,7 @@ export default {
       error: [],
       windowHeight: 300,
       contentHeight: 550,
+      books: null,
     };
   },
   methods: {
@@ -227,7 +228,13 @@ export default {
       error(error) {
         this.error.push(JSON.stringify(error.message));
       }
-    }
+    },
+    books: {
+      query: BOOKS,
+      error(error) {
+        this.error.push(JSON.stringify(error.message));
+      }
+    },
   }
 };
 </script>

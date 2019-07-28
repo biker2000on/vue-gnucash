@@ -41,36 +41,37 @@ export default {
   }),
   methods: {
     mapAccounts() {
+      if (!this.budget) return
       let map = flattenToObject(
         this.accountTree,
         node => node.children,
         node => {
           let bgt = {}
-          if (this.budget) {
-            for (let i=0; i < this.budget.num_periods; i++) {
-              bgt['bgt' + i] = null
-              bgt['subtotal' + i] = 0
-            }
+          for (let i=0; i < this.budget.num_periods; i++) {
+            bgt['bgt' + i] = { amount: Dinero(), subtotal: Dinero() }
+            // bgt['subtotal' + i] = { amount: Dinero(), type: 'subtotal' }
           }
           let { children, ...flat } = node
           return {...flat, ...bgt}
         },
         node => node.guid
       )
-      if (this.budget) {
-        this.budget.budget_amounts.map(c => {
-          map[c.account_guid]['bgt' + c.period_num] = {
-            amount_num: c.amount_num,
-            amount_denom: c.amount_denom,
-            id: c.id,
-          }
+      this.budget.budget_amounts.map(c => {
+        let amt = Dinero({
+          amount: c.amount_num,
+          precision: Math.log10(c.amount_denom)
         })
-      }
+        map[c.account_guid]['bgt' + c.period_num] = { 
+          amount: amt,
+          subtotal: amt
+        }
+      })
       const tree = makeTreeFromObject(
         map, 
         "parent_guid",
         "children",
-        "fd4dd79886327b270a0fa8efe6a07972"
+        "fd4dd79886327b270a0fa8efe6a07972",
+        this.budget.num_periods
       )
       // console.log('tree', tree)
       this.accountMap = tree
@@ -96,25 +97,24 @@ export default {
           title: i + 1,
           field: 'bgt' + i,
           sorter: 'number',
-          mutator: function (value, row, type, params, component) {
-            console.log('mutator value', value, row, type, params, component)
-            if (!value) return Dinero() // check for null
-            if (type == 'data' && Object.keys(value).includes('amount_num')) { // make Dinero
-              return Dinero({
-                  amount: value.amount_num,
-                  precision: Math.log10(value.amount_denom)
-                })
-            }
-            return value // already Dinero object
-            
-          },
           formatter: function(cell, formatterParams, onRendered) {
             const val = cell.getValue()
-            if (val.isZero()) {
-              return ""
+            const el = cell.getElement()
+            if (val.amount.isZero()) { // if amount is 0 (and subtotal != 0) then it must be a subtotal
+              el.classList.add('subtotal')
+              return val.subtotal.toFormat("$0,0.00")
             } 
-            return val.toFormat("$0,0.00")
+            return val.amount.toFormat("$0,0.00")
           },
+          editor: "number",
+          mutatorEdit(value, data, type, params, component) {
+            let amtString = value.toString()
+            let amt = Dinero({
+              amount: Number(amtString.replace(/\./, '')),
+              precision: amtString.length - amtString.indexOf('.') - 1
+            })
+            return { amount: amt, subtotal: amt }
+          }
         })
       }
       return [
@@ -124,11 +124,6 @@ export default {
           sorter: "string",
           align: 'left'
         },
-        {
-          title: 'Description',
-          field: 'description',
-          align: 'left',
-        }, 
         ...periods
       ]
     },
@@ -164,5 +159,8 @@ export default {
 
 <style lang="scss">
 @import "../../node_modules/vue-tabulator/dist/scss/tabulator.scss";
+.subtotal {
+  color: grey;
+}
 </style>
 
