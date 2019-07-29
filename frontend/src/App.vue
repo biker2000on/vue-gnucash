@@ -75,9 +75,9 @@ export default {
       this.$router.push(event)
     },
     routerNav(tab) {
-      if (tab.name == 'account') {
+      if (tab.type == 'account') {
         return {
-          name: tab.name,
+          name: tab.type,
           params: {
             account_guid: tab.id,
             flataccounts: this.accountNameMap,
@@ -87,9 +87,9 @@ export default {
           }
         }
       }
-      if (tab.name == 'budget') {
+      if (tab.type == 'budget') {
         return {
-          name: tab.name,
+          name: tab.type,
           params: {
             budget_guid: tab.id,
             accountTree: this.accountTree,
@@ -97,19 +97,20 @@ export default {
           }
         }
       }
-      if (tab.name == 'accountTree') {
+      if (tab.type == 'accountTree') {
         return {
-          name: tab.name,
+          name: tab.type,
           params: {
             accountTree: this.accountTree
           }
         }
       }
     },
-    buildTab(id, name) {
+    buildTab(id, type) {
       let tab = {
         id,
-        name,
+        type,
+        name: this.typeMap[id].name,
       }
       tab.route = this.routerNav(tab)
       return tab
@@ -124,15 +125,15 @@ export default {
       } 
       // this.active_tab = tab
     },
-    tabsUpdate(e, name) { // need to update
+    tabsUpdate(e, type) { // need to update
       let tab
-      if (name == 'account') {
+      if (type == 'account') {
         if (e[0]) {
           this.active_account_guid = e[0];
-          tab = this.buildTab(e[0], name)
+          tab = this.buildTab(e[0], type)
         }
       } else {
-        tab = this.buildTab(e, name)
+        tab = this.buildTab(e, type)
       }
       this.computeHeight()
       this.updateTab(tab)
@@ -179,6 +180,13 @@ export default {
         node => node.guid
       );
     },
+    typeMap() {
+      return {
+        ...this.budgetMap,
+        ...this.flattenedAccountsMap,
+        accountTree: {name: 'Accounts'},
+      }
+    },
     budgetMap() {
       let budgetMap = {}
       if (this.budgets) {
@@ -208,7 +216,7 @@ export default {
         return this.commoditityMap[this.flattenedAccountsMap[this.active_account_guid].commodity_guid];
       }
       return null
-    }
+    },
   },
   watch: {
     tabs(newTab, oldTab) {
