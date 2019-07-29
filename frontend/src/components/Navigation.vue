@@ -82,7 +82,6 @@
           hoverable
           item-key="guid"
           @update:active="$emit('update-account',$event)"
-          return-object
         />
       </v-list-group>
     </v-list>

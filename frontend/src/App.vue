@@ -3,9 +3,9 @@
     <Navigation
       :accountTree="accountTree"
       :budgets="budgets"
-      @update-account="update_active($event)"
-      @update-budget="update_budget($event)"
-      @home-click="goHome($event)"
+      @update-account="tabsUpdate($event, 'account')"
+      @update-budget="tabsUpdate($event, 'budget')"
+      @home-click="tabsUpdate('accountTree', 'accountTree')"
       :drawer.sync="drawer"
     />
     <v-toolbar fixed app dark color="primary">
@@ -25,12 +25,10 @@
           color="primary"
           dark
         >
-          <v-tab v-for="i in tabs" :key="i" :href="`#tab-${i}`">
-            {{ i == 'accountTree1' ? 'Accounts' : 
-              flattenedAccountsMap[i] ? flattenedAccountsMap[i].name + ' ' :
-              budgetMap[i] ? budgetMap[i].name + ' ' : '' }}
+          <v-tab v-for="tab in tabsClean" :key="tab.id" :to="routerNav(tab)" >
+            {{ tab.name + ' ' }}
             <span
-              @click="closeTab(i)"
+              @click="closeTab(tab)"
               class="close error"
             >x</span>
           </v-tab>
@@ -39,51 +37,21 @@
     </v-toolbar>
 
     <v-content>
-      <v-tabs-items v-model="active_tab">
-        <v-tab-item v-for="tab in tabs" :key="tab" :value="'tab-' + tab">
-          <account-tree-tabulator
-            v-if="tab == 'accountTree1' && accountTree"
-            :accountTree="accountTree"
-            ref="grid"
-          />
-          <account-tabulator
-            v-if="active_account_guid  && accountNameMap && tab != 'accountTree1'"
-            :account_guid="tab"
-            :flataccounts="accountNameMap"
-            :commodity="active_commodity"
-            :type_map="flattenedAccountsMap"
-            :height="contentHeight"
-            ref="grid"
-          />
-          <budget 
-            v-if="budgetMap[tab] && accountTree" 
-            :accountTree="accountTree" 
-            :budget_guid="tab"
-            :height="contentHeight"
-            ref="grid" 
-          />
-        </v-tab-item>
-      </v-tabs-items>
+      <router-view></router-view>
     </v-content>
   </v-app>
 </template>
 
 <script>
-import AccountTabulator from "./components/AccountTabulator";
 import Navigation from "./components/Navigation";
 import { flattenToObject } from "./utilities/flattenTree";
-import AccountTreeTabulator from "./components/AccountTreeTabulator";
 import { makeTree } from "./utilities/makeTree";
 import { ACCOUNTS, BUDGETS, COMMODITIES, BOOKS } from "./assets/js/root-queries";
-import Budget from "./components/Budget";
 
 export default {
   name: "App",
   components: {
     Navigation,
-    AccountTabulator,
-    AccountTreeTabulator,
-    Budget
   },
   data() {
     return {
@@ -91,7 +59,8 @@ export default {
       search: null,
       active_account_guid: null,
       active_account: null,
-      tabs: ["accountTree1"],
+      tabs: [],
+      tabsClean: [],
       active_tab: null,
       splits: {},
       separator: ":",
@@ -102,40 +71,76 @@ export default {
     };
   },
   methods: {
-    goHome(e) {
-      if (!this.tabs.includes("accountTree1")) {
-        this.tabs.unshift("accountTree1");
-      }
-      this.active_tab = "tab-accountTree1";
+    updateRouter(event) {
+      this.$router.push(event)
     },
-    update_active(e) {
-      if (e[0]) {
-        const { children, ...account } = e[0];
-        this.active_account = account;
-        this.active_account_guid = e[0].guid;
-        this.computeHeight()
-        if (this.tabs.includes(undefined)) {
-          this.tabs.pop(this.tabs.indexOf(undefined));
-        }
-        if (this.tabs.includes(this.active_account_guid)) {
-          this.active_tab = e[0].guid;
-        } else {
-          this.tabs.push(e[0].guid);
-          this.active_tab = "tab-" + e[0].guid;
+    routerNav(tab) {
+      if (tab.name == 'account') {
+        return {
+          name: tab.name,
+          params: {
+            account_guid: tab.id,
+            flataccounts: this.accountNameMap,
+            type_map: this.flattenedAccountsMap,
+            commodity: this.active_commodity,
+            height: this.contentHeight
+          }
         }
       }
+      if (tab.name == 'budget') {
+        return {
+          name: tab.name,
+          params: {
+            budget_guid: tab.id,
+            accountTree: this.accountTree,
+            height: this.contentHeight,
+          }
+        }
+      }
+      if (tab.name == 'accountTree') {
+        return {
+          name: tab.name,
+          params: {
+            accountTree: this.accountTree
+          }
+        }
+      }
+    },
+    buildTab(id, name) {
+      let tab = {
+        id,
+        name,
+      }
+      tab.route = this.routerNav(tab)
+      return tab
+    },
+    updateTab(tab) {
+      if (this.tabs.includes(undefined)) {
+        this.tabs.pop(this.tabs.indexOf(undefined));
+      }
+      const filt = this.tabs.filter(c => c == tab)
+      if (!filt.length) {
+        this.tabs.push(tab)
+      } 
+      // this.active_tab = tab
+    },
+    tabsUpdate(e, name) { // need to update
+      let tab
+      if (name == 'account') {
+        if (e[0]) {
+          this.active_account_guid = e[0];
+          tab = this.buildTab(e[0], name)
+        }
+      } else {
+        tab = this.buildTab(e, name)
+      }
+      this.computeHeight()
+      this.updateTab(tab)
     },
     computeHeight() {
       const top = this.$vuetify.application.top
       const bottom = this.$vuetify.application.bottom
       this.contentHeight = this.windowHeight - top - bottom
-    },
-    update_budget(guid) {
-      if (!this.tabs.includes(guid)) {
-        this.tabs.push(guid)
-      }
-      this.computeHeight()
-      this.active_tab = 'tab-' + guid
     },
     closeTab(key) {
       if (this.tabs.includes(key)) {
@@ -199,10 +204,19 @@ export default {
       return map;
     },
     active_commodity() {
-      return this.commoditityMap[this.active_account.commodity_guid];
+      if (this.active_account_guid) {
+        return this.commoditityMap[this.flattenedAccountsMap[this.active_account_guid].commodity_guid];
+      }
+      return null
+    }
+  },
+  watch: {
+    tabs(newTab, oldTab) {
+      this.tabsClean = this.tabs.filter(c => c)
     }
   },
   mounted() {
+    this.tabsUpdate('accountTree','accountTree')
     this.$nextTick(() => {
       window.addEventListener('resize', () => {
         this.windowHeight = window.innerHeight

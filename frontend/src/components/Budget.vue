@@ -70,7 +70,7 @@ export default {
         map, 
         "parent_guid",
         "children",
-        "fd4dd79886327b270a0fa8efe6a07972",
+        "fd4dd79886327b270a0fa8efe6a07972", // root account guid
         this.budget.num_periods
       )
       // console.log('tree', tree)

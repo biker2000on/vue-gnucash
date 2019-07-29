@@ -1,6 +1,6 @@
 <template>
   <vue-tabulator
-    v-if="accountTree"
+    v-if="accountTree.length"
     v-model="accountTree"
     :options="options"
     ref="tabulator"
@@ -9,30 +9,27 @@
 
 <script>
 import { flattenToArray } from "../utilities/flattenTree";
+import { ACCOUNTS } from '../assets/js/root-queries'
+import { makeTree } from '../utilities/makeTree'
 
 export default {
-  props: {
-    accountTree: {
-      type: Array,
-      required: true,
-      default: null,
-    },
-    height: {
-      type: Number,
-      default: 550,
-    }
-  },
   data: () => ({
     showHidden: false,
+    accounts: [],
+    height: 550,
   }),
   methods: {
+    computeHeight() {
+      const top = this.$vuetify.application.top
+      const bottom = this.$vuetify.application.bottom
+      this.height = window.innerHeight - top - bottom
+    },
     filter() {
       return true;
     }
   },
   computed: {
     options() {
-      const vm = this
       return {
         height: this.height,
         dataTree: true,
@@ -40,7 +37,7 @@ export default {
         dataTreeBranchElement: false,
         dataTreeChildIndent: 15,
         dataTreeStartExpanded: [true,true,false], // start with first 2 levels expanded
-        columns: vm.columns
+        columns: this.columns
       }
     },
     columns() {
@@ -69,7 +66,31 @@ export default {
         },
         node => node.guid
       );
+    },
+    accountTree() {
+      if (this.accounts) {
+        const tree = makeTree(
+          this.accounts,
+          "guid",
+          "parent_guid",
+          "children",
+          "fd4dd79886327b270a0fa8efe6a07972"
+        );
+        return tree;
+      }
+      return [];
     }
+  },
+  mounted() {
+    this.computeHeight()
+  },
+  apollo: {
+    accounts: {
+      query: ACCOUNTS,
+      error(error) {
+        this.error.push(JSON.stringify(error.message));
+      }
+    },
   }
 };
 </script>
