@@ -3,7 +3,7 @@ import Vuetify from 'vuetify/lib'
 import 'vuetify/src/stylus/app.styl'
 import colors from 'vuetify/es5/util/colors'
 import VueTabulator from 'vue-tabulator'
-import VueRouter from 'vue-router'
+import 'material-design-icons-iconfont/dist/material-design-icons.css'
 
 
 Vue.use(Vuetify, {
@@ -15,5 +15,4 @@ Vue.use(Vuetify, {
   }
 })
 
-Vue.use(VueRouter)
 Vue.use(VueTabulator)
