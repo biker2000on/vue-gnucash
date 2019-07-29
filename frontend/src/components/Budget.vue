@@ -12,11 +12,14 @@ import { flattenToArray, flattenToObject } from "../utilities/flattenTree";
 import { makeTreeFromObject } from '../utilities/makeTree'
 import { BUDGET } from '../assets/js/root-queries'
 import Dinero from 'dinero.js'
+import moment from 'moment'
 
-Dinero.globalLocale = 'en-US'
-Dinero.defaultAmount = 0;
-Dinero.defaultCurrency = 'USD' // get from root account
-Dinero.defaultPrecision = 2;
+const periodTypeMap = {
+  year: {step: 'year', format: 'YYYY'},
+  month: {step: 'month', format: 'MMM'},
+  week: {step: 'week', format: 'ww'},
+  day: {step: 'day', format: 'DDD'},
+}
 
 export default {
   props: {
@@ -40,8 +43,15 @@ export default {
     budget: null,
   }),
   methods: {
+    dineroDefaults() {
+      Dinero.globalLocale = 'en-US'
+      Dinero.defaultAmount = 0;
+      Dinero.defaultCurrency = 'USD' // get from root account
+      Dinero.defaultPrecision = 2;
+    },
     mapAccounts() {
       if (!this.budget) return
+      this.dineroDefaults()
       let map = flattenToObject(
         this.accountTree,
         node => node.children,
@@ -92,9 +102,13 @@ export default {
     columns() {
       const vm = this
       let periods = []
+      let start = moment(this.budget.recurrence_period_start)
+      const stepSize = this.budget.recurrence_period_type
+      const recMult = this.budget.recurrence_mult
+      const type = periodTypeMap[stepSize]
       for (let i=0; i < this.budget.num_periods; i++) {
         periods.push({
-          title: i + 1,
+          title: start.format(type.format),
           field: 'bgt' + i,
           sorter: 'number',
           formatter: function(cell, formatterParams, onRendered) {
@@ -116,6 +130,7 @@ export default {
             return { amount: amt, subtotal: amt }
           }
         })
+        start.add(recMult, type.step)
       }
       return [
         {
