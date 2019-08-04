@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Budget from '../components/Budget'
+import Report from '../components/Report'
 import AccountTabulator from '../components/AccountTabulator'
 import AccountTreeTabulator from '../components/AccountTreeTabulator'
 
@@ -27,6 +28,12 @@ const routes = [
     component: AccountTreeTabulator,
     props: true,
     alias: '/accounts'
+  },
+  {
+    path: '/report',
+    name: 'report',
+    component: Report, 
+    props: true,
   }
 ]
 
