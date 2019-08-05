@@ -49,7 +49,7 @@
           <v-list-tile-title>{{ budget.name }}</v-list-tile-title>
         </v-list-tile>
       </v-list-group>
-      <v-list-tile :to="{name: 'report'}" >
+      <v-list-tile @click="$emit('update-report','report')" >
         <v-list-tile-action>
           <v-icon>timeline</v-icon>
         </v-list-tile-action>

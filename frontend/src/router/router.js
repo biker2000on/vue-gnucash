@@ -8,8 +8,6 @@ import AccountTreeTabulator from '../components/AccountTreeTabulator'
 Vue.use(VueRouter)
 
 const routes = [
-  // { path: '/foo', component: Foo },
-  // { path: '/bar', component: Bar }
   {
     path: '/budget/:budget_guid',
     name: 'budget',

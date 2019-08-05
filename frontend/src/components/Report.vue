@@ -3,6 +3,7 @@ import { Bar } from 'vue-chartjs'
 
 export default {
   extends: Bar,
+  props: ['options'],
   mounted () {
     // Overwriting base render method with actual data.
     this.renderChart({
@@ -14,7 +15,7 @@ export default {
           data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
         }
       ]
-    })
+    }, this.options)
   }
 }
 </script>

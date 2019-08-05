@@ -5,6 +5,7 @@
       :budgets="budgets"
       @update-account="tabsUpdate($event, 'account')"
       @update-budget="tabsUpdate($event, 'budget')"
+      @update-report="tabsUpdate($event, 'report')"
       @home-click="tabsUpdate('accountTree', 'accountTree')"
       :drawer.sync="drawer"
     />
@@ -75,36 +76,50 @@ export default {
       this.$router.push(event)
     },
     routerNav(tab) {
-      if (tab.type == 'account') {
-        return {
-          name: tab.type,
-          params: {
-            account_guid: tab.id,
-            flataccounts: this.accountNameMap,
-            type_map: this.flattenedAccountsMap,
-            commodity: this.active_commodity,
-            height: this.contentHeight
+      switch (tab.type) {
+        case 'account':
+          return {
+            name: tab.type,
+            params: {
+              account_guid: tab.id,
+              flataccounts: this.accountNameMap,
+              type_map: this.flattenedAccountsMap,
+              commodity: this.active_commodity,
+              height: this.contentHeight
+            }
           }
-        }
-      }
-      if (tab.type == 'budget') {
-        return {
-          name: tab.type,
-          params: {
-            budget_guid: tab.id,
-            accountTree: this.accountTree,
-            height: this.contentHeight,
+        case 'budget':
+          return {
+            name: tab.type,
+            params: {
+              budget_guid: tab.id,
+              accountTree: this.accountTree,
+              height: this.contentHeight,
+            }
           }
-        }
-      }
-      if (tab.type == 'accountTree') {
-        return {
-          name: tab.type,
-          params: {
-            accountTree: this.accountTree
+        case 'accountTree':
+          return {
+            name: tab.type,
+            params: {
+              accountTree: this.accountTree
+            }
           }
-        }
+        case 'report':
+          return {
+            name: tab.type,
+            params: {
+              options: {
+                height: this.contentHeight,
+              }
+            }
+          }
       }
+      // if (tab.type == 'account') {
+      // }
+      // if (tab.type == 'budget') {
+      // }
+      // if (tab.type == 'accountTree') {
+      // }
     },
     buildTab(id, type) {
       let tab = {
@@ -185,6 +200,7 @@ export default {
         ...this.budgetMap,
         ...this.flattenedAccountsMap,
         accountTree: {name: 'Accounts'},
+        report: {name: 'Report'},
       }
     },
     budgetMap() {
