@@ -106,10 +106,15 @@ export default {
           }
         case 'report':
           return {
-            name: tab.type,
+            name: tab.name,
             params: {
               options: {
-                height: this.contentHeight,
+                responsive: true,
+                maintainAspectRatio: false,
+              },
+              styles: {
+                height: this.contentHeight + 'px',
+                position: 'relative',
               }
             }
           }
@@ -125,7 +130,7 @@ export default {
       let tab = {
         id,
         type,
-        name: this.typeMap[id].name,
+        name: this.typeMap[id].name || id,
       }
       tab.route = this.routerNav(tab)
       return tab
@@ -201,7 +206,16 @@ export default {
         ...this.flattenedAccountsMap,
         accountTree: {name: 'Accounts'},
         report: {name: 'Report'},
-      }
+        "pie": {name: 'pie'},
+        "doughnut": {name: 'doughnut'},
+        "bar": {name: 'bar'},
+        "line": {name: 'line'},
+        "bubble": {name: 'bubble'},
+        "radar": {name: 'radar'},
+        "polarArea": {name: 'polar-area'},
+        "horizontalBar": {name: 'horizontal-bar'},
+        "scatter": {name: 'scatter'},
+      } 
     },
     budgetMap() {
       let budgetMap = {}

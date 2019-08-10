@@ -42,19 +42,31 @@
       <v-list-group prepend-icon="attach_money" @click.stop :value="false">
         <template v-slot:activator>
           <v-list-tile>
-        <v-list-tile-title>Budget</v-list-tile-title>
-        </v-list-tile>
+            <v-list-tile-title>Budget</v-list-tile-title>
+          </v-list-tile>
         </template>
-        <v-list-tile v-for="budget in budgets" :key="budget.guid" @click="$emit('update-budget',budget.guid)">
+        <v-list-tile
+          v-for="budget in budgets"
+          :key="budget.guid"
+          @click="$emit('update-budget',budget.guid)"
+        >
           <v-list-tile-title>{{ budget.name }}</v-list-tile-title>
         </v-list-tile>
       </v-list-group>
-      <v-list-tile @click="$emit('update-report','report')" >
-        <v-list-tile-action>
-          <v-icon>timeline</v-icon>
-        </v-list-tile-action>
-        <v-list-tile-title>Reports</v-list-tile-title>
-      </v-list-tile>
+      <v-list-group prepend-icon="timeline" @click.stop :value="false">
+        <template v-slot:activator>
+          <v-list-tile>
+            <v-list-tile-title>Reports</v-list-tile-title>
+          </v-list-tile>
+        </template>
+        <v-list-tile
+          v-for="chart in charts"
+          :key="chart + '123'"
+          @click="$emit('update-report', chart)"
+        >
+          <v-list-tile-title>{{ chart }}</v-list-tile-title>
+        </v-list-tile>
+      </v-list-group>
 
       <v-list-group prepend-icon="account_balance" :value="true">
         <template v-slot:activator>
@@ -85,10 +97,10 @@
         />
       </v-list-group>
     </v-list>
-    <account-settings :dialog.sync="accountSettingsDialog"/>
-    <budget-settings :dialog.sync="budgetSettingsDialog"/>
+    <account-settings :dialog.sync="accountSettingsDialog" />
+    <budget-settings :dialog.sync="budgetSettingsDialog" />
     <report-settings :dialog.sync="reportSettingsDialog" :accountTree="accountTree" />
-    <transaction-settings :dialog.sync="transactionSettingsDialog"/>
+    <transaction-settings :dialog.sync="transactionSettingsDialog" />
     <viewable-account-settings :dialog.sync="viewableSettingsDialog" />
   </v-navigation-drawer>
 </template>
@@ -98,7 +110,7 @@ import AccountSettings from "./Settings/AccountSettings";
 import BudgetSettings from "./Settings/BudgetSettings";
 import ReportSettings from "./Settings/ReportSettings";
 import TransactionSettings from "./Settings/TransactionSettings";
-import ViewableAccountSettings from './Settings/ViewableAccountSettings'
+import ViewableAccountSettings from "./Settings/ViewableAccountSettings";
 
 export default {
   name: "Navigation",
@@ -132,6 +144,17 @@ export default {
       reportSettingsDialog: false,
       transactionSettingsDialog: false,
       viewableSettingsDialog: false,
+      charts: [
+        "pie",
+        "doughnut",
+        "bar",
+        "line",
+        "bubble",
+        "radar",
+        "polarArea",
+        "horizontalBar",
+        "scatter"
+      ]
     };
   },
   methods: {
@@ -155,7 +178,7 @@ export default {
       this.transactionSettingsDialog = !this.transactionSettingsDialog;
     },
     openViewableSettings(e) {
-      this.viewableSettingsDialog = !this.viewableSettingsDialog
+      this.viewableSettingsDialog = !this.viewableSettingsDialog;
     }
   }
 };
