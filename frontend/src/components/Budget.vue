@@ -13,6 +13,7 @@ import { makeTreeFromObject } from '../utilities/makeTree'
 import { BUDGET } from '../assets/js/root-queries'
 import Dinero from 'dinero.js'
 import moment from 'moment'
+import { traverseDF } from '../utilities/traverseTree'
 
 const periodTypeMap = {
   year: {step: 'year', format: 'YYYY'},
@@ -85,6 +86,8 @@ export default {
       )
       // console.log('tree', tree)
       this.accountMap = tree
+      console.log('check on budget traverse')
+      traverseDF(this.accountMap, node => console.log(node.name))
     },
   },
   computed: {
